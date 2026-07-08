@@ -25,10 +25,7 @@
 #include "bflib_basics.h"
 #include "game_legacy.h"
 
-#if defined(_WIN32)
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#endif
+#include <SDL2/SDL.h>
 #include "post_inc.h"
 
 #ifdef __cplusplus
@@ -41,9 +38,9 @@ long double sleep_precision_ns = 20000000; // 20ms
 struct TbTime global_time;
 struct TbDate global_date;
 TbClockMSec (* LbTimerClock)(void);
-int slowdown_current = 0;
-int slowdown_average = 0;
-int slowdown_max = 0;
+int stutter_detection_current = 0;
+int stutter_detection_average = 0;
+int stutter_detection_max = 0;
 /******************************************************************************/
 #define TimePoint std::chrono::high_resolution_clock::time_point
 #define TimeNow std::chrono::high_resolution_clock::now()
@@ -61,7 +58,7 @@ void initial_time_point()
   game.process_turn_time = 1.0; // Begin initial turn as soon as possible (like original game)
 }
 
-long double get_time_tick_ns()
+int64_t get_time_tick_ns()
 {
   return TimeTickNs;
 }
@@ -98,22 +95,6 @@ int get_trigger_time_measurement_fps(struct TriggerTimeMeasurement *trigger)
   return cnt;
 }
 
-
-float get_delta_time()
-{
-    // Allow frame skip to work correctly when delta time is enabled
-    if ( (game.frame_skip != 0) && ((game.play_gameturn % game.frame_skip) != 0)) {
-        return 1.0;
-    }
-    long double frame_time_in_nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(TimeNow - delta_time_previous_timepoint).count();
-    delta_time_previous_timepoint = TimeNow;
-    float calculated_delta_time = (frame_time_in_nanoseconds/1000000000.0) * game_num_fps;
-    if (calculated_delta_time > 1.0) { // Fix for when initially loading the map, frametime takes too long. Possibly other circumstances too.
-        calculated_delta_time = 1.0;
-    }
-    return calculated_delta_time;
-}
-
 void frametime_set_all_measurements_to_be_displayed()
 {
     // Display the frametime of the previous frame only, not the current frametime. Drawing "frametime_current" is a bad idea because frametimes are displayed on screen half-way through the rest of the measurements.
@@ -123,7 +104,7 @@ void frametime_set_all_measurements_to_be_displayed()
     {
         // Once per half-second set the display text to highest frametime of the past half-second
         frametime_measurements.max_timer += game.delta_time;
-        if (frametime_measurements.max_timer > (game_num_fps/2)) {
+        if (frametime_measurements.max_timer > (turns_per_second/2)) {
             frametime_measurements.max_timer = 0;
             once_per_half_second = true;
         }
@@ -307,9 +288,7 @@ TbResult LbDateTimeDecode(const time_t *datetime,struct TbDate *curr_date,struct
 
 inline void LbDoMultitasking(void)
 {
-#if defined(_WIN32)
-    Sleep(LARGE_DELAY_TIME>>1); // This switches to other tasks
-#endif
+    SDL_Delay(LARGE_DELAY_TIME>>1);
 }
 
 TbBool LbSleepFor(TbClockMSec delay)
@@ -398,36 +377,37 @@ TbResult LbTimerInit(void)
   return Lb_SUCCESS;
 }
 
-int get_current_slowdown_percentage() {
+int get_current_stutter_percentage()
+{
     static TbClockMSec last_frame_timestamp = 0;
-    static int slowdown_history[50] = {0};
+    static int stutter_detection_history[50] = {0};
     static int history_index = 0;
     TbClockMSec current_timestamp = LbTimerClock();
     TbClockMSec frame_time_ms = 0;
-    int slowdown_pct = 0;
+    int stutter_detection_pct = 0;
     if (last_frame_timestamp != 0) {
         frame_time_ms = current_timestamp - last_frame_timestamp;
-        int expected_frame_time = 1000 / game_num_fps;
+        int expected_frame_time = 1000 / turns_per_second;
         if (frame_time_ms > expected_frame_time) {
-            slowdown_pct = ((frame_time_ms - expected_frame_time) * 100) / expected_frame_time;
+            stutter_detection_pct = ((frame_time_ms - expected_frame_time) * 100) / expected_frame_time;
         }
     }
     last_frame_timestamp = current_timestamp;
-    slowdown_current = slowdown_pct;
-    slowdown_history[history_index] = slowdown_pct;
+    stutter_detection_current = stutter_detection_pct;
+    stutter_detection_history[history_index] = stutter_detection_pct;
     history_index = (history_index + 1) % 50;
     int sum = 0;
     int max = 0;
     int i;
     for (i = 0; i < 50; i++) {
-        sum += slowdown_history[i];
-        if (slowdown_history[i] > max) {
-            max = slowdown_history[i];
+        sum += stutter_detection_history[i];
+        if (stutter_detection_history[i] > max) {
+            max = stutter_detection_history[i];
         }
     }
-    slowdown_average = sum / 50;
-    slowdown_max = max;
-    return slowdown_pct;
+    stutter_detection_average = sum / 50;
+    stutter_detection_max = max;
+    return stutter_detection_pct;
 }
 
 /******************************************************************************/

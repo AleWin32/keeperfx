@@ -28,6 +28,7 @@
 #include "bflib_datetm.h"
 #include "bflib_sound.h"
 #include "kjm_input.h"
+#include "config_sounds.h"
 #include "gui_frontbtns.h"
 #include "gui_soundmsgs.h"
 #include "config_strings.h"
@@ -55,7 +56,6 @@ const struct TbBirthday team_birthdays[] = {
     {13,11,"Alex Peters"},
     { 1,12,"Dene Carter"},
     {25, 5,"Tomasz Lis"},
-    {29,11,"Michael Chateauneuf"},
     {0,0,NULL},
     };
 
@@ -149,7 +149,7 @@ void input_eastegg(void)
     short allow = (lbKeyOn[KC_LSHIFT] != 0);
     unsigned short state = input_eastegg_keycodes(&game.eastegg01_cntr, allow, &eastegg_feckoff_codes);
     if ((state == 2) || (state == 3)) {
-      play_non_3d_sample(60);
+      play_non_3d_sample(snd_tab_click);
     }
     // Maintain the JLW cheat
     if (game.easter_eggs_enabled == true)
@@ -157,7 +157,7 @@ void input_eastegg(void)
       allow = (lbKeyOn[KC_LSHIFT]) && (lbKeyOn[KC_RSHIFT]);
       state = input_eastegg_keycodes(&game.eastegg02_cntr,allow,&eastegg_jlw_codes);
       if ((state == 1) || (state == 2) || (state == 3)) {
-        play_non_3d_sample(159);
+        play_non_3d_sample(snd_cheat_activated);
       }
     }
     // Maintain the BBKING cheat
@@ -167,7 +167,7 @@ void input_eastegg(void)
       static unsigned char length = 0;
       state = input_eastegg_keycodes(&length, allow, &eastegg_bbking_codes);
       if (length == eastegg_bbking_codes.length) {
-        play_non_3d_sample(159);
+        play_non_3d_sample(snd_cheat_activated);
         toggle_bbking_mode();
         length = 0; // prevent re-trigger
       }
@@ -215,13 +215,13 @@ void draw_eastegg(void)
       unsigned char pos;
       for (i = 0; i < 30; i += 2)
       {
-        pos = game.play_gameturn - i;
+        pos = get_gameturn() - i;
         lbDisplay.DrawColour = pos;
         LbTextDrawResized(scale_fixed_DK_value((LbCosL(16*(long)pos) / 512 + skeksis_x_offset) / pixel_size),
           scale_fixed_DK_value((LbSinL(32*(long)pos) / 512 + skeksis_y_offset) / pixel_size), ee_units_per_px, text);
       }
       clear_flag(lbDisplay.DrawFlags, Lb_TEXT_ONE_COLOR);
-      pos=game.play_gameturn;
+      pos=get_gameturn();
       LbTextDrawResized(scale_fixed_DK_value((LbCosL(16*(long)pos) / 512 + skeksis_x_offset) / pixel_size),
           scale_fixed_DK_value((LbSinL(32*(long)pos) / 512 + skeksis_y_offset) / pixel_size), ee_units_per_px, text);
       if (eastegg_skeksis_cntr >= 255)
@@ -263,7 +263,7 @@ void draw_eastegg(void)
     {
       LbTextDrawResized(scale_fixed_DK_value(px[i]/pixel_size), scale_fixed_DK_value(py[i]/pixel_size), ee_units_per_px, text);
     }
-    play_non_3d_sample_no_overlap(90);
+    play_non_3d_sample_no_overlap(snd_alarm);
   }
   if (game.easter_eggs_enabled == false)
     return;
@@ -303,7 +303,7 @@ void draw_eastegg(void)
     {
         LbTextDrawResized(scale_fixed_DK_value(px[i]/pixel_size), scale_fixed_DK_value(py[i]/pixel_size), ee_units_per_px, text);
     }
-    play_non_3d_sample_no_overlap(90);
+    play_non_3d_sample_no_overlap(snd_alarm);
   }
 }
 

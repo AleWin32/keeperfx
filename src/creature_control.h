@@ -21,6 +21,7 @@
 
 #include "bflib_basics.h"
 #include "globals.h"
+#include "bflib_sound.h"
 
 #include "ariadne.h"
 #include "creature_graphics.h"
@@ -48,7 +49,7 @@ extern "C" {
 #define INSTANCE_TYPES_MAX 2000
 #define LAIR_ENEMY_MAX 5
 
-#define INVALID_CRTR_CONTROL (game.persons.cctrl_lookup[0])
+#define INVALID_CRTR_CONTROL (&game.cctrl_data[0])
 /******************************************************************************/
 #pragma pack(1)
 
@@ -56,19 +57,17 @@ struct Thing;
 struct PlayerInfo;
 
 enum CreatureSoundTypes {
-    CrSnd_None      = 0,
-    CrSnd_Hurt      = 1,
-    CrSnd_Hit       = 2,
-    CrSnd_Happy     = 3,
-    CrSnd_Sad       = 4,
-    CrSnd_Hang      = 5,
-    CrSnd_Drop      = 6,
-    CrSnd_Torture   = 7,
-    CrSnd_Slap      = 8,
-    CrSnd_Die       = 9,
-    CrSnd_Foot      = 10,
-    CrSnd_Fight     = 11,
-    CrSnd_Piss      = 12,
+    CrSnd_Hit = 1,
+    CrSnd_Happy = 2,
+    CrSnd_Sad = 3,
+    CrSnd_Hang = 4,
+    CrSnd_Drop = 5,
+    CrSnd_Torture = 6,
+    CrSnd_Slap = 7,
+    CrSnd_Die = 8,
+    CrSnd_Foot = 9,
+    CrSnd_Fight = 10,
+    CrSnd_Piss = 11,
 };
 
 enum CreatureControlFlags {
@@ -135,6 +134,12 @@ struct CastedSpellData {
     PlayerNumber caster_owner;
 };
 
+
+// As a factor of `tortured.accumulated_torture_points` for 1 turn, to avoid precision loss caused by integer division, it should be designed as the product of all divisors. Note: This must be the product, not the Least Common Multiple (LCM).
+// Now the divisors are: 3
+// Note: Since accumulated_torture_points includes `room->efficiency`, if factor increases in the future, we need to consider switching to int64_t to prevent overflow issues
+#define TORTURE_ACCUM_FAC 3
+
 struct CreatureControl {
     CctrlIndex index;
     unsigned short creature_control_flags;
@@ -185,7 +190,8 @@ struct CreatureControl {
     ThingIndex pickup_creature_id;
     unsigned short next_in_group;
     unsigned short prev_in_group;
-    uint32_t group_info;// offset 7A
+    ThingIndex group_leader_idx;
+    uint16_t group_member_count;
     short last_work_room_id;
     /** Work room index, used when creature is working in a room. */
     short work_room_id;
@@ -194,6 +200,7 @@ struct CreatureControl {
     int32_t turns_at_job;
     short blocking_door_id;
     unsigned char move_flags;
+    unsigned long cleanse_flags;
 
   union // Union on diggers, heroes and normal creatures
   {
@@ -239,11 +246,11 @@ struct CreatureControl {
   union // Jobs union
   {
       struct {
-        GameTurn start_gameturn;
         GameTurn state_start_turn;
         GameTurn torturer_start_turn;
+        int32_t accumulated_torture_points;
         ThingIndex assigned_torturer;
-        unsigned char vis_state;
+        unsigned char visual_state;
       } tortured;
       struct {
         GameTurn start_gameturn;
@@ -363,7 +370,7 @@ struct CreatureControl {
     unsigned char cowers_from_slap_turns;
     short conscious_back_turns;
     short countdown; // signed
-    unsigned short damage_wall_coords;
+    SubtlCodedCoords damage_wall_coords;
     unsigned char joining_age;
     unsigned char blood_type;
     char creature_name[CREATURE_NAME_MAX];
@@ -423,7 +430,7 @@ struct Persons {
 
 struct CreatureSound {
     int32_t index;
-    int32_t count;
+    int16_t count;
 };
 
 struct CreatureSounds {
@@ -431,7 +438,6 @@ struct CreatureSounds {
     struct CreatureSound hit;
     struct CreatureSound happy;
     struct CreatureSound sad;
-    struct CreatureSound hurt;
     struct CreatureSound die;
     struct CreatureSound hang;
     struct CreatureSound drop;
@@ -464,10 +470,22 @@ void play_creature_sound(struct Thing *thing, long snd_idx, long a3, long a4);
 void stop_creature_sound(struct Thing *thing, long snd_idx);
 void play_creature_sound_and_create_sound_thing(struct Thing *thing, long snd_idx, long a2);
 struct CreatureSound *get_creature_sound(struct Thing *thing, long snd_idx);
-void reset_creature_eye_lens(struct Thing *thing);
 TbBool creature_can_gain_experience(const struct Thing *thing);
+
+/** Convert a CreatureSound slot + variant index to the unified sample ID.
+ *  Standard sounds: index is a positive raw effect-bank ID; returns index+i.
+ *  Custom sounds:   index is negative -(bank+1); thing_play_sample converts
+ *                   these to get_custom_offset()+(-index-1)+i. We produce
+ *                   the same unified ID so S3DEmitterIsPlayingSample can match. */
+static inline SoundSmplTblID creature_sound_unified_id(const struct CreatureSound *crsound, long i)
+{
+    if (crsound->index < 0)
+        return (SoundSmplTblID)(get_custom_offset() + (-crsound->index - 1) + i);
+    return (SoundSmplTblID)(crsound->index + i);
+}
 /******************************************************************************/
 #ifdef __cplusplus
 }
 #endif
 #endif
+

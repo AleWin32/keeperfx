@@ -14,6 +14,7 @@
  *     (at your option) any later version.
  */
 /******************************************************************************/
+#include "kfx_memory.h"
 #include "pre_inc.h"
 #include "config_spritecolors.h"
 #include "globals.h"
@@ -154,7 +155,7 @@ short get_player_colored_button_sprite_idx(const short base_icon_idx,const Playe
     unsigned char color_idx;
     if (plyr_idx == PLAYER_NEUTRAL)
     {
-        color_idx = (game.play_gameturn % (4 * neutral_flash_rate)) / neutral_flash_rate;
+        color_idx = (get_gameturn() % (4 * neutral_flash_rate)) / neutral_flash_rate;
     }
     else
     {

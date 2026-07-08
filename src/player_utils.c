@@ -23,6 +23,7 @@
 #include "bflib_basics.h"
 #include "bflib_math.h"
 #include "bflib_sound.h"
+#include "config_sounds.h"
 #include "bflib_sndlib.h"
 #include "api.h"
 #include "player_data.h"
@@ -40,6 +41,7 @@
 #include "gui_soundmsgs.h"
 #include "gui_frontmenu.h"
 #include "config_settings.h"
+#include "config_keeperfx.h"
 #include "config_spritecolors.h"
 #include "config_terrain.h"
 #include "map_blocks.h"
@@ -112,10 +114,10 @@ void set_player_as_won_level(struct PlayerInfo *player)
         {
             show_real_time_taken();
         }
-        struct GameTime GameT = get_game_time(dungeon->lvstats.hopes_dashed, game_num_fps);
+        struct GameTime GameT = get_game_time(dungeon->lvstats.hopes_dashed, turns_per_second);
         SYNCMSG("Won level %u. Total turns taken: %lu (%02u:%02u:%02u at %d fps). Real time elapsed: %02u:%02u:%02u:%03u.",
             game.loaded_level_number, dungeon->lvstats.hopes_dashed,
-            GameT.Hours, GameT.Minutes, GameT.Seconds, game_num_fps,
+            GameT.Hours, GameT.Minutes, GameT.Seconds, turns_per_second,
             Timer.Hours, Timer.Minutes, Timer.Seconds, Timer.MSeconds);
       }
   }
@@ -123,8 +125,8 @@ void set_player_as_won_level(struct PlayerInfo *player)
   // Computing player score
   dungeon->lvstats.player_score = compute_player_final_score(player, dungeon->max_gameplay_score);
   dungeon->lvstats.allow_save_score = 1;
-  if ((game.system_flags & GSF_NetworkActive) == 0)
-    player->display_objective_turn = game.play_gameturn + 300;
+  if (!network_is_active())
+    player->display_objective_turn = get_gameturn() + 300;
   if (my_player)
   {
     if (lord_of_the_land_in_prison_or_tortured())
@@ -164,7 +166,7 @@ void set_player_as_lost_level(struct PlayerInfo *player)
         turn_off_all_menus();
         clear_transfered_creatures();
     }
-    if ((game.conf.rules[player->id_number].game.classic_bugs_flags & ClscBug_NoHandPurgeOnDefeat) == 0) {
+    if ((game.conf.rules[player->id_number].gameplay.classic_bugs_flags & ClscBug_NoHandPurgeOnDefeat) == 0) {
         clear_things_in_hand(player);
         dungeon->num_things_in_hand = 0;
     }
@@ -196,9 +198,9 @@ void set_player_as_lost_level(struct PlayerInfo *player)
         }
     }
     set_player_state(player, PSt_CtrlDungeon, 0);
-    if ((game.system_flags & GSF_NetworkActive) == 0)
-        player->display_objective_turn = game.play_gameturn + 300;
-    if ((game.system_flags & GSF_NetworkActive) != 0)
+    if (!network_is_active())
+        player->display_objective_turn = get_gameturn() + 300;
+    if (network_is_active())
         reveal_whole_map(player);
     if ((dungeon->computer_enabled & 0x01) != 0)
         toggle_computer_player(player->id_number);
@@ -207,7 +209,7 @@ void set_player_as_lost_level(struct PlayerInfo *player)
 long compute_player_final_score(struct PlayerInfo *player, long gameplay_score)
 {
     long i;
-    if (((game.system_flags & GSF_NetworkActive) != 0)
+    if (network_is_active()
       || !is_singleplayer_level(game.loaded_level_number)) {
         i = 2 * gameplay_score;
     } else {
@@ -1116,6 +1118,10 @@ void init_players_local_game(void)
         default: player->view_mode_restore = PVM_IsoWibbleView; break;
     }
     init_player(player, 0);
+    set_creature_tendencies(player, CrTend_Imprison, IMPRISON_BUTTON_DEFAULT);
+    set_creature_tendencies(player, CrTend_Flee, FLEE_BUTTON_DEFAULT);
+    game.creatures_tend_imprison = IMPRISON_BUTTON_DEFAULT;
+    game.creatures_tend_flee = FLEE_BUTTON_DEFAULT;
 }
 
 void process_player_states(void)
@@ -1129,7 +1135,7 @@ void process_player_states(void)
             if ( (player->work_state == PSt_CreatrInfo) || (player->work_state == PSt_CreatrInfoAll) )
             {
                 struct Thing* thing = thing_get(player->controlled_thing_idx);
-                struct Camera* cam = player->acamera;
+                struct Camera* cam = get_player_active_camera(player);
                 if ((cam != NULL) && thing_exists(thing)) {
                     cam->mappos.x.val = thing->mappos.x.val;
                     cam->mappos.y.val = thing->mappos.y.val;
@@ -1197,7 +1203,7 @@ TbBool player_sell_trap_at_subtile(PlayerNumber plyr_idx, MapSubtlCoord stl_x, M
 
     if (is_my_player_number(plyr_idx))
     {
-        play_non_3d_sample(115);
+        play_non_3d_sample(snd_tile_sell);
     }
     dungeon->camera_deviate_jump = 192;
     if (sell_value != 0)
@@ -1229,13 +1235,13 @@ TbBool player_sell_door_at_subtile(PlayerNumber plyr_idx, MapSubtlCoord stl_x, M
     struct DoorConfigStats *doorst = get_door_model_stats(thing->model);
     struct Dungeon* dungeon = get_players_num_dungeon(thing->owner);
     dungeon->camera_deviate_jump = 192;
-    GoldAmount sell_value = compute_value_percentage(doorst->selling_value, game.conf.rules[plyr_idx].game.door_sale_percent);
+    GoldAmount sell_value = compute_value_percentage(doorst->selling_value, game.conf.rules[plyr_idx].gameplay.door_sale_percent);
     dungeon->doors_sold++;
     dungeon->manufacture_gold += sell_value;
     destroy_door(thing);
     if (is_my_player_number(plyr_idx))
     {
-        play_non_3d_sample(115); // TODO config make this sound configurable?
+        play_non_3d_sample(snd_tile_sell);
     }
     struct Coord3d pos;
     set_coords_to_slab_center(&pos,subtile_slab(stl_x),subtile_slab(stl_y));

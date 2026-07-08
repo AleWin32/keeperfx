@@ -20,7 +20,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GUI Strings for KeeperFX\n"
 "POT-Creation-Date: 2012-09-02 01:12+0200\n"
-"PO-Revision-Date: 2026-01-05 00:14+0100\n"
+"PO-Revision-Date: 2026-01-21 15:21+0100\n"
 "Last-Translator: \n"
 "Language-Team: KeeperFX Team <github.com/dkfans>\n"
 "Language: ru\n"
@@ -51,7 +51,8 @@ msgid ""
 "with Treasure Room tiles."
 msgstr ""
 "Первое, что необходимо Хранителю, это место для хранения золота, которое из породы добывают бесы. Чтобы построить "
-"сокровищницу, щелкните по иконке сокровищницы на панели помещений и застройте ею пустующее пространство на западе."
+"сокровищницу, щелкните по иконке сокровищницы на панели помещений и выделите под неё пустующее пространство на "
+"западе."
 
 #. Level Eversmile information when started building Treasure Room
 #: guitext:3
@@ -60,8 +61,8 @@ msgid ""
 "Use the cursor keys to see other areas of the underworld. Rotate and zoom the view with the right ctrl key and "
 "cursor keys."
 msgstr ""
-"Использyйте стрелки, чтобы осмотреть другие области подземного мира. Вращать и приближать камеру можно комбинацией "
-"клавиш <Правый Ctrl + стрелки>."
+"Использyйте стрелки, чтобы осматривать другие области подземного мира. Вращать и приближать камеру можно "
+"комбинацией клавиш <Правый Ctrl + стрелки>."
 
 #. Level Eversmile objective when built Treasure Room
 #: guitext:4
@@ -107,7 +108,7 @@ msgid ""
 msgstr ""
 "Алчная работа, Хранитель. Теперь нужно превратить часть Вашего подземелья в логово. В логове создания могут "
 "отдыхать и залечивать раны. То место, где Ваши бесы только что выкопали все золото, станет идеальным прибежищем "
-"для нескольких созданий. Нажмите на иконку логова в панели помещений."
+"для нескольких созданий. Нажмите на иконку логова на панели помещений."
 
 #. Level Eversmile objective after Lair built
 #: guitext:8
@@ -170,8 +171,8 @@ msgid ""
 "the hideous insect the speed to intercept the most nimble trespassers."
 msgstr ""
 "В подземелье появился первый прислужник. Это гигантская муха. Она может плеваться едкой слюной в Ваших врагов, а "
-"крылья этого омерзительного насекомого позволяют ему быстро перемещаться и благодаря этому останавливать самых "
-"проворных незваных гостей."
+"крылья этого омерзительного насекомого позволяют ему быстро перемещаться и благодаря этому вовремя встречать "
+"самых проворных незваных гостей."
 
 #. Level Eversmile objective after getting first beetle
 #: guitext:14
@@ -181,7 +182,7 @@ msgid ""
 "require food. Dig out a new area, select the Hatchery icon and create your Hatchery. Tasty snacks will soon emerge "
 "from its enchanted soil."
 msgstr ""
-"Жук укрылся в Ваших владениях. Он способен выдержать достаточно значительный урон. Как и большинству других "
+"Жук укрылся в Ваших владениях. Его панцирь способен выдержать значительный урон. Как и большинству других "
 "созданий, жукам нужна пища. Проройте новое помещение, щелкните по иконке питомника и постройте питомник. Вкусная "
 "закуска скоро появится на этой благословенной земле."
 
@@ -251,7 +252,7 @@ msgid ""
 "You require more Imps. Use the Create Imp spell to conjure them into your domain. Remember, each Imp you create is "
 "more expensive than the last."
 msgstr ""
-"Вам нужно больше бесов. Используйте заклинание "Создать беса", чтобы призвать их в Свои владения. Учтите: каждый "
+"Вам нужно больше бесов. Используйте заклинание "Создать беса", чтобы призвать их в Свои владения. Учтите, каждый "
 "следующий бес обходится дороже предыдущего."
 
 #. Level Cosyton information soon after start
@@ -283,7 +284,7 @@ msgid ""
 "Remember the lessons you learned in Brana Hauk. You must build a Treasure Room, a Lair and a Hatchery and you will "
 "need to claim a Portal. Build rooms in squares of at least nine tiles to increase the efficiency of the room."
 msgstr ""
-"Вспомните уроки, которые Вы выучили в Бpана Хаук. Нужно построить сокровищницу, логово, питомник, а затем "
+"Вспомните уроки, которые Вы выучили в Брана-Хаук. Нужно построить сокровищницу, логово, питомник, а затем "
 "захватить портал. Стройте квадратные помещения не менее чем из девяти тайлов, чтобы повысить их эффективность."
 
 #. Level Cosyton objective after basic rooms built
@@ -329,8 +330,8 @@ msgstr ""
 msgctxt "In-game message"
 msgid "You can train creatures more rapidly by slapping them as they work out in the Training Room."
 msgstr ""
-"Процесс обучения созданий пойдет быстрее, если наградить их парой зуботычин, пока они тренируются в "
-"соответствующем помещении."
+"Создания станут обучаться быстрее, если наградить их парой зуботычин, пока они тренируются в соответствующем "
+"помещении."
 
 #. Level Cosyton objective soon after 2nd Demon Spawn
 #: guitext:30
@@ -340,7 +341,7 @@ msgid ""
 "you will face in this realm are tougher than those you met beneath Brana Hauk."
 msgstr ""
 "Герои уже на подступах. Убедитесь, что Ваши создания хорошо обучены и готовы к обороне. Те герои, с которыми Вы "
-"столкнетесь в этом королевстве, сильнее, чем те, что встретились Вам в Бpана Хаук."
+"столкнетесь в этом королевстве, сильнее, чем те, что встретились Вам в недрах Брана-Хаук."
 
 #. Level Cosyton objective after defeating LOTL (option 1)
 #: guitext:31
@@ -431,7 +432,7 @@ msgid ""
 "You meet with success yet again, Keeper. All those corpses will keep your Hatchery's topsoil fertile. They also "
 "serve as warnings to other foolhardy adventurers, of course."
 msgstr ""
-"Вы вновь достигли успеха, Хранитель. Все эти трупы пойдут на удобрение земли Вашего питомника. Разумеется, они "
+"Вы вновь добились успеха, Хранитель. Все эти трупы пойдут на удобрение земли Вашего питомника. Разумеется, они "
 "также послужат предупреждением другим отчаянным сорвиголовам."
 
 #. Level Waterdream Warm objective
@@ -441,7 +442,7 @@ msgid ""
 "All is quiet again. Use this time to ready yourself for the next attacks. The enemy is only regrouping. It is not "
 "yet defeated."
 msgstr ""
-"И снова тишь да гладь. Потратьте это время на подготовку к следующим атакам. Враг еще не побежден - он только "
+"И снова тишь да гладь. Потратьте это время на подготовку к новым штурмам. Враг еще не побежден - он только "
 "перегруппировывается."
 
 #. Level Waterdream Warm information
@@ -529,8 +530,8 @@ msgstr "Нужно найти способ пересечь реку раска�
 msgctxt "In-game message"
 msgid "The enemy's Dungeon Heart throbs before you. Assemble your minions nearby and administer the coup de grâce."
 msgstr ""
-"Сердце вражеского подземелья бьется прямо перед Вами. Соберите Своих прислужников неподалеку и нанесите последний "
-"удар."
+"Сердце вражеского подземелья бьется прямо перед Вами. Соберите Своих прислужников неподалеку и нанесите "
+"смертельный удар."
 
 #. Level Flowerhat information
 #: guitext:52
@@ -539,8 +540,8 @@ msgid ""
 "A Troll has joined you. Skilled in the craft of manufacturing, Trolls are best employed doing dark deeds in your "
 "Workshop. They don't complain about the hours, because their labours keep them away from combat."
 msgstr ""
-"Тролли присоединились к Вам. Они искусные работники и лучше всего исполнят Ваши темные планы в мастерской. Они не "
-"жалуются на рабочий график, поскольку работа позволяет им держаться подальше от сражений."
+"Тролль присоединился к Вам. Эти создания - искусные работники, которые творят самые темные делишки в мастерской. "
+"Они не жалуются на рабочий график, поскольку работа позволяет им держаться подальше от сражений."
 
 #. Level Flowerhat objective
 #: guitext:53
@@ -559,8 +560,8 @@ msgid ""
 "Your Workshop has created a Wooden Door. Placed in a corridor, it restricts access to the enemy. Your creatures "
 "may pass freely. Lock or unlock Doors by clicking over them with the left mouse button."
 msgstr ""
-"В Вашей мастерской была создана деревянная дверь. Она ограничивает проход врагу, если поставить её в узком "
-"коридоре. Ваши создания могут проходить через неё беспрепятственно, если дверь не закрыта. Чтобы закрыть или "
+"В Вашей мастерской была создана деревянная дверь. Она ограничивает проход врагу, если перекрыть ею узкий "
+"коридор. Ваши создания могут проходить через неё беспрепятственно, если дверь не закрыта. Чтобы закрыть или "
 "открыть дверь, щелкните по ней левой кнопки мыши."
 
 #. Level Flowerhat information
@@ -571,7 +572,7 @@ msgid ""
 "area in deadly vapours."
 msgstr ""
 "В Вашей мастерской была изготовлена ловушка с ядовитым газом. Установите её, и как только кто-то посторонний "
-"заденет её, помещение заполнится смертельными испарениями."
+"заденет её, помещение заполнится смертельно ядовитыми испарениями."
 
 #. Level Flowerhat information
 #: guitext:56
@@ -582,8 +583,8 @@ msgid ""
 "territory."
 msgstr ""
 "Вы открыли заклинание "К оружию!". При первом применении заклинания создания собираются вокруг знамени, "
-"создаваемого заклинанием. После этого используйте заклинание там, куда нужно направить созданий. Плата за "
-"использование заклинания взимается только тогда, когда оно используется за пределами Ваших владений."
+"материализуемого заклинанием. После этого используйте заклинание там, куда нужно направить созданий. Плата "
+"за использование заклинания взимается только тогда, когда оно применяется за пределами Ваших владений."
 
 #. Level Lushmeadow-on-Down objective
 #: guitext:57
@@ -592,9 +593,9 @@ msgid ""
 "Another Keeper controls this underworld realm. His dungeon lies to the north. If you are to entice creatures to "
 "work for you instead of him, you will have to build a more magnificent dungeon. Get on with it then."
 msgstr ""
-"Другой Хранитель контролирует это подземное королевство. Его подземелье лежит к северу. Если Вы хотите переманить "
-"его созданий и заставить работать на Вас, нужно построить более внушительное подземелье, чем у него. Так чего же "
-"Вы ждете?"
+"Другой Хранитель контролирует это подземное королевство. Его подземелье лежит к северу. Если хотите переманить его "
+"созданий и заставить работать на Вас, нужно построить более внушительное подземелье, чем у него. Так чего же Вы "
+"ждете?"
 
 #. Level Lushmeadow-on-Down objective
 #: guitext:58
@@ -604,7 +605,7 @@ msgid ""
 "Dungeon Keeper worthy of the name."
 msgstr ""
 "Вы уничтожили Своего конкурента. Его поражение свидетельствует о том, сколь разумно Вы подошли к разработке плана "
-"подземелья. У Вас есть задатки для того, чтобы быть достойным титула Хранителя подземелья."
+"подземелья. У Вас есть задатки для того, чтобы заслужить титул Хранителя подземелья."
 
 #. Level Lushmeadow-on-Down information
 #: guitext:59
@@ -614,7 +615,7 @@ msgid ""
 "monstrosities attack somewhat unconventionally."
 msgstr ""
 "Желчный демон решил встать на Вашу сторону. Они любят, когда в логовах много места, а в питомниках царит изобилие. "
-"Способ, каким эти жирные монстры, атакуют противника, несколько... м-м-м... непривычен."
+"Способ, каким эти жирные монстры атакуют противника, несколько... м-м-м... непривычен."
 
 #. Level Lushmeadow-on-Down information
 #: guitext:60
@@ -635,7 +636,7 @@ msgid ""
 "warriors for you to command."
 msgstr ""
 "Вы захватили тюрьму. Нажмите кнопку "Заключать в тюрьму" на информационной панели, и Ваши создания станут "
-"обездвиживать врагов в бою, после чего бесы будут уносить тела в камеры. Подохшие с голоду заключенные превратятся "
+"обездвиживать врагов в бою, после чего бесы будут уносить тела в камеры. Подохшие с голоду заключенные обратятся "
 "в скелетов и будут сражаться на Вашей стороне."
 
 #. Level Lushmeadow-on-Down information
@@ -686,9 +687,9 @@ msgid ""
 "to your supremely evil way. Alternatively, place your own creatures within the room whenever disciplinary measures "
 "become necessary."
 msgstr ""
-"Вы захватили пыточную. Кидайте пойманных героев и созданий в эту комнату страха, чтобы обратить их в Свое высшей "
-"степени черное дело. Кроме того, Вы можете бросать сюда Своих созданий, если к ним необходимо принять меры "
-"дисциплинарного характера."
+"Вы захватили пыточную. Кидайте пойманных героев и созданий в эту комнату страха, чтобы обратить их в Свое в высшей "
+"степени черное дело. Кроме того, Вы можете бросать сюда Своих созданий, если к ним необходимо применить меры "
+"дисциплинарного воздействия."
 
 #. Level Snuggledell information
 #: guitext:67
@@ -762,7 +763,7 @@ msgctxt "In-game message"
 msgid ""
 "You have turned local heroes into something of an endangered species, now make the enemy Dungeon Keeper extinct."
 msgstr ""
-"Вы превратили местных героев в нечто вроде вымирающего вида, теперь пришло время вымереть и для противостоящего "
+"Вы превратили местных героев в нечто вроде вымирающего вида. Теперь пришло время исчезнуть и для противостоящего "
 "Вам Хранителя подземелья."
 
 #. Level Wishvale objective
@@ -783,7 +784,7 @@ msgid ""
 "to him. On the other hand, string him up. It's in the only language he understands."
 msgstr ""
 "Разыщите того, кто претендовал на соперничество с Вами за эту часть подземного мира. Разъясните ему концепцию "
-"досрочного выхода на пенсию, а затем вздерните его на виселице. Это единственный понятный ему язык."
+"досрочного выхода на пенсию. А лучше вздерните его на виселице - это единственный понятный ему язык."
 
 #. Level Tickle information
 #: guitext:77
@@ -798,7 +799,7 @@ msgstr ""
 msgctxt "In-game message"
 msgid "The Protect Creature spell has been researched at last. Cast it on a creature to increase its toughness."
 msgstr ""
-"Разработка заклинания "Защищать чудище" наконец-то завершена. Используйте его на создании, чтобы снизить его "
+"Разработка заклинания "Защитить чудище" наконец-то завершена. Используйте его на создании, чтобы снизить его "
 "уязвимость."
 
 #. Level Tickle objective
@@ -821,7 +822,7 @@ msgid ""
 msgstr ""
 "Исследователи обнаружили планы храма во имя темных богов. Он позволяет приносить в жертву созданий в бассейне "
 "храма и получать за это божьи дары. Однако с выбором жертв придется поэкспериментировать - темным богам не так-то "
-"легко угодить."
+"просто угодить."
 
 #. Level Moonbrush Wood objective
 #: guitext:81
@@ -852,7 +853,7 @@ msgid ""
 msgstr ""
 "Узрите! Се есть рогатый жнец. Не вздумайте рассердить его. Впрочем, что бы Вы ни делали, он все равно разъярится, "
 "ибо ярится он от чего угодно. Поэтому постарайтесь хотя бы, чтобы в тот момент, когда его охватит гнев, с ним "
-"рядомнаходились исключительно враги."
+"рядом находились исключительно враги."
 
 #. Level Moonbrush Wood information
 #: guitext:84
@@ -861,7 +862,7 @@ msgid ""
 "Your researchers have concocted a Disease spell. Cast it on enemy creatures and watch the affliction spread like "
 "the plague."
 msgstr ""
-"Ваши исследователи выдумали заклинание "Болезнь". Примените его на вражеском создании и смотрите, как недуг "
+"Ваши исследователи выдумали заклинание "Заразить". Примените его на вражеском создании и смотрите, как недуг "
 "распространяется словно чума."
 
 #. Level Moonbrush Wood information
@@ -873,7 +874,7 @@ msgid ""
 "your employ."
 msgstr ""
 "На Вашем кладбище поднялся вампир, вскормленный душами тех мертвецов, которых принесли сюда. Вам придется "
-"заискивать перед ним, если не хотите, чтобы он разозлился и ушел. Помните: вампиры - одни из самых могущественных "
+"заискивать перед ним, если не хотите, чтобы он разозлился и ушел. Помните, вампиры - одни из самых могущественных "
 "и зловещих прислужников, какие только есть в Вашем распоряжении."
 
 #. Level Moonbrush Wood information
@@ -890,7 +891,7 @@ msgstr ""
 #: guitext:87
 msgctxt "In-game message"
 msgid "You have manufactured an Iron Door. It's a formidable barrier. Use it well."
-msgstr "Вы изготовили железную дверь. Это эффективная преграда. Используйте её с умом."
+msgstr "Вы изготовили железную дверь. Это великолепная преграда. Используйте её с умом."
 
 #. Level Elf's Dance objective
 #: guitext:88
@@ -941,8 +942,8 @@ msgid ""
 "Your tireless librarians have researched the Scavenger Room. Creatures placed within a Scavenger Room will lure "
 "their kin from other dungeons and the outside world, into your domain."
 msgstr ""
-"Ваши без устали работающие библиотекари открыли растлительную. Создания, размещенные в этом зале, будут привлекать "
-"своих собратьев из других подземелий и внешнего мира в Ваши владения."
+"Ваши без устали работающие библиотекари открыли растлительную. Создания, размещенные в этом помещении, будут "
+"привлекать своих собратьев из других подземелий и внешнего мира в Ваши владения."
 
 #. Level Nevergrim information
 #: guitext:93
@@ -1024,8 +1025,8 @@ msgstr ""
 msgctxt "In-game message"
 msgid "Notch up another victory, most malicious one. You have another land to add to your dismal collection."
 msgstr ""
-"Запишите себе в актив еще одну победу, Ваше злокозненное Величество! В Вашей зловещей коллекции теперь есть еще "
-"один экземпляр."
+"Запишите себе в актив еще одну победу, Ваше злокозненное Величество! В Вашей зловещей коллекции королевств теперь "
+"есть еще один экземпляр."
 
 #. Level Hearth objective
 #: guitext:102
@@ -1035,7 +1036,7 @@ msgid ""
 "Train your creatures and prepare for another battle. You're attracting quite an audience."
 msgstr ""
 "Свора демонов пятого круга ада с одобрением отозвалась об уничтожении первой волны. Готовьте Своих созданий к "
-"следующей битве - на шоу с Вашим участием собирается немалая аудитория."
+"следующей битве - на шоу с Вашим участием собирается внушительная аудитория."
 
 #. Level Hearth objective
 #: guitext:103
@@ -1060,8 +1061,8 @@ msgid ""
 "If lands had legs, this one would be on its knees. Its desperate inhabitants are preparing a full scale attack on "
 "your dungeon. It will be an ideal opportunity to practise unspeakable evil on a massive scale. Go for it, master."
 msgstr ""
-"Если бы y стран были ноги, эта встала бы на колени. Её отчаявшиеся жители готовят полномасштабную атаку на Ваше "
-"подземелье. Это прекрасная возможность для применения чудовищного оружия массового злодейства. Дерзайте, "
+"Будь у стран ноги, эта бы уже стояла на коленях. Её жалкие жители готовят полномасштабное наступление на "
+"Ваше подземелье. Прекрасный шанс потренироваться в неописуемом зле на широких массах. Дерзайте, "
 "Повелитель."
 
 #. Level Woodly Rhyme information
@@ -1159,7 +1160,8 @@ msgid ""
 "interesting treasure worth stealing. Now that's what I call practical archaeology."
 msgstr ""
 "Это древнее подземелье обладает огромной археологической ценностью. Это буквально означает, что там наверняка есть "
-"какие-нибудь ценные сокровища, которые можно стащить. Вот что я называю практической археологией."
+"какие-нибудь интересные сокровища, которые стоят того, чтобы их украсть. Вот что я называю практической "
+"археологией."
 
 #. Level Woodly Rhyme information
 #: guitext:117
@@ -1218,7 +1220,7 @@ msgid ""
 "against you. It's pathetic. They deserve to have their heads impaled on lances for such impudence."
 msgstr ""
 "Ваше местонахождение уже известно героям этого королевства. Они мобилизовали все доступные им силы против Вас. "
-"Какие ничтожества! В наказание за такую наглость нужно насадить их головы на пики."
+"Какие ничтожества! В наказание за такую наглость нужно насадить их отрубленные головы на копья."
 
 #. Level Mirthshire objective
 #: guitext:123
@@ -1311,7 +1313,7 @@ msgid ""
 "Ultimately, only the one who rules the underworld can conquer the realms above."
 msgstr ""
 "Три других Хранителя, таких же злых и могущественных, как Вы, столкнулись за право присоединить эти земли к своим "
-"империям. Однако лишь тот, кто правит подземным миром, сможет захватить земли, расположенные на поверхности."
+"империям. И лишь тот, кто правит подземным миром, сможет забрать себе земли, расположенные на поверхности."
 
 #. Level Skybird Trill objective
 #: guitext:134
@@ -1332,9 +1334,9 @@ msgid ""
 "the prize."
 msgstr ""
 "Вы разрушили замок Аватара, но Ваш соперник уже захватил Аватара в плен. Как бы то ни было, лишь Хранитель с самым "
-"черным сердцем сможет уничтожить этого легендарного героя. Так что обыщите подземелье Вашего соперника, и награда "
-"Ваша."
-
+"черным сердцем сможет стереть этого легендарного героя с лица земли. Так что обыщите подземелье Вашего "
+"соперника, и награда Ваша."
+ 
 #. Level Skybird Trill objective
 #: guitext:136
 msgctxt "In-game message"
@@ -1428,7 +1430,7 @@ msgstr "Половина отведенного Вам времени истек
 #: guitext:146
 msgctxt "In-game message"
 msgid "You are out of time. That was a shocking performance."
-msgstr "Время вышло. Это шоу было ужасающим."
+msgstr "Время вышло. Это представление было шокирующим."
 
 #. Level Bonus 3 objective
 #: guitext:147
@@ -1485,7 +1487,7 @@ msgid ""
 "enemy here. Defeat it, and you will find where a legendary warrior is imprisoned. That warrior will serve you well "
 "in the future."
 msgstr ""
-"Эта область подземного мира станет испытанием Вашему умению преодолевать сеть пещер. Здесь время - Ваш главный "
+"Эта область подземного мира станет испытанием Вашему умению преодолевать сеть пещер. Здесь время - Ваш злейший "
 "враг. Одолейте его, и Вы найдете темницу, в которой томится легендарный воин. Он сослужит Вам хорошую службу в "
 "дальнейшем."
 
@@ -1496,7 +1498,7 @@ msgid ""
 "The people of this realm speak of a Dungeon Keeper called Wisel, who is bound to get in your way. When he does, "
 "you will have to consign him to history. This will be no mean feat. Resources are scarce because of his activities."
 msgstr ""
-"Жители этого королевства рассказывают о Хранителе подземелья по имени Визел, который непременно встанет у Вас на "
+"Жители этого королевства рассказывают о Хранителе подземелья по имени Вайзел, который непременно встанет у Вас на "
 "пути. Когда это произойдет, Вы должны сделать его достоянием истории. Ох и нелегкая это работа. Его кипучая "
 "деятельность привела к нехватке ресурсов."
 
@@ -1505,7 +1507,7 @@ msgstr ""
 msgctxt "In-game message"
 msgid "Wisel is defeated. The land is yours to plunder and despoil for all eternity. Give 'em hell, master."
 msgstr ""
-"Визел побежден. Эта земля теперь Ваша, и Вы можете грабить и разорять её во веки веков. Взгрейте их, Повелитель."
+"Вайзел побежден. Эта земля теперь Ваша, и Вы можете грабить и разорять её во веки веков. Взгрейте их, Повелитель."
 
 #. Level Mistle information
 #: guitext:156
@@ -1640,7 +1642,7 @@ msgctxt "In-game message"
 msgid "Finally, you stand unchallenged. The world is yours to waste and despoil. I bet you have never felt so bad."
 msgstr ""
 "Наконец-то пришло то время, когда не осталось никого, кто мог бы бросить Вам вызов! Весь мир теперь у Ваших ног, и "
-"Вы можете спокойно разорять и разграблять его. Готов поспорить, Вас одолевают нехорошие чувства..."
+"Вы можете спокойно разорять и разграблять его. Готов поспорить, Вас одолевают поистине нехорошие чувства..."
 
 #. Level Skybird Trill objective
 #: guitext:173
@@ -1832,7 +1834,7 @@ msgid ""
 "Experience: The creature's experience level. Behind the level number is a bar indicating the creatures progress "
 "towards attaining more experience."
 msgstr ""
-"Опыт: Уровень, достигнутый существом. Под показателем уровня расположена шкала, показывающая количество опыта, "
+"Опыт: Опыт, набранный существом. Под показателем уровня расположена шкала, отображающая количество опыта, "
 "оставшееся до получения следующего уровня."
 
 #: guitext:224
@@ -1848,7 +1850,7 @@ msgstr "Отмена"
 #: guitext:226
 msgctxt "Creature spell"
 msgid "Arrow: The basic ranged weapon, effective at long distance."
-msgstr "Стрела: Простейшее оружие дальнего боя, эффективное на больших дистанциях."
+msgstr "Стрела: Примитивное оружие дальнего боя, эффективное на больших дистанциях."
 
 #: guitext:227
 msgctxt "Creature spell"
@@ -1857,7 +1859,7 @@ msgid ""
 "aimed blow."
 msgstr ""
 "Заморозка: Превращает создание в кусок льда. В это время оно не способно двигаться и может разлететься на куски от "
-"удачного удара."
+"точного удара."
 
 #: guitext:228
 msgctxt "Creature spell"
@@ -1883,7 +1885,7 @@ msgstr "Отражение: Отражает заклинание, примен�
 #: guitext:231
 msgctxt "Creature spell"
 msgid "Fear: Causes the opponent to be terrified and wanting to skip engaging into combat."
-msgstr "Стpах: Запугивает врага, заставляя его бежать с поля боя."
+msgstr "Стpах: Запугивает врага, вызывая у него желание не вступать в бой."
 
 #: guitext:232
 msgctxt "Creature spell"
@@ -1937,7 +1939,7 @@ msgstr "Группировка: Не используется"
 msgctxt "Creature spell"
 msgid "Invisibility: Makes the creature invisible to all enemies. Unless they possess a subnatural sight."
 msgstr ""
-"Невидимость: Делает создание невидимым для любых врагов. Если, конечно, у них нет сверхъестественного видения."
+"Невидимость: Делает создание невидимым для любых врагов. Если, конечно, у них нет сверхъестественного зрения."
 
 #: guitext:240
 msgctxt "Creature spell"
@@ -1987,21 +1989,21 @@ msgid ""
 "Word of Power: Causes rings of demonic energy to emanate from the creature's body and inflicts massive damage on "
 "the vicinity. Very effective against crowded hordes of enemies. Also pushes them back."
 msgstr ""
-"Слово Силы: При применении создание излучает кольца демонической энергии, которые наносят огромный урон тем, кто "
+"Слово Силы: При применении создание излучает кольца темной энергии, которые наносят огромный урон тем, кто "
 "оказался в зоне досягаемости. Чрезвычайно эффективно против обложивших со всех сторон врагов. Также эти кольца "
 "отбрасывают их назад."
 
 #: guitext:248
 msgctxt "Creature spell"
 msgid "Heal: When this is cast, the creature is massively healed."
-msgstr "Исцелить: При произнесении излечивает большинство ран, полученных созданием."
+msgstr "Исцеление: При произнесении излечивает большинство ран, полученных созданием."
 
 #: guitext:249
 msgctxt "Creature spell"
 msgid ""
 "Wind: Creates a force twelve gale in your dungeon blowing every creature away from you. And nasty smells of course."
 msgstr ""
-"Ветер: Вызывает в подземелье 12-балльный ураган, что позволяет сдуть любое создание куда подальше. А еще оно, "
+"Ветер: Вызывает в подземелье 12-балльный ураган, что позволяет сдуть любое создание куда подальше. А еще ветер, "
 "естественно, уносит неприятные запахи..."
 
 #: guitext:250
@@ -2054,7 +2056,7 @@ msgid ""
 "Chicken: Turns enemy into chicken for a while. The enemy isn't able to attack, but has the same strength and thus "
 "won't be as easy to kill as a normal chicken."
 msgstr ""
-"Превратить в цыпленка: На время превращает врага в цыпленка. Он не может атаковать, но его сила остается прежней, "
+"Превращение в цыпленка: На время превращает врага в цыпленка. Он не может атаковать, но его сила остается прежней, "
 "поэтому убить его будет сложнее, чем обычного цыпленка."
 
 #: guitext:257
@@ -2299,7 +2301,7 @@ msgstr ""
 #: guitext:301
 msgctxt "In-game interface description"
 msgid "Blood type: As if you care. Blood is blood, right?"
-msgstr "Группа крови: Как будто Вам не все равно! Ну кровь и кровь, что такого-то?"
+msgstr "Группа крови: Как будто Вам не все равно! Ну кровь и кровь, что в ней такого-то?"
 
 #: guitext:302
 msgctxt "In-game interface description"
@@ -2323,24 +2325,25 @@ msgstr "Сражающиеся: Создания, сражающиеся с вр
 #: guitext:305
 msgctxt "In-game interface description"
 msgid "Fight: Your creatures always attack and will not avoid any combat. LMB select."
-msgstr "Сражаться: Ваши создания будут всегда нападать и не будут уклоняться от боя. ЛКМ - выбор."
+msgstr "Сражаться: Ваши создания будут всегда нападать и не будут уклоняться от боя. ЛКМ - включение."
 
 #: guitext:306
 msgctxt "In-game interface description"
 msgid "Flee: Your creatures attempt to preserve their lives, running away if they are too badly injured. LMB select."
 msgstr ""
-"Спасаться бегством: При активации Ваши создания будут пытаться спасти свою жизнь, убегая с поля боя в случае "
-"тяжелых ранений. ЛКМ - выбор."
+"Спасаться бегством: Ваши создания будут пытаться спасти свою жизнь, убегая с поля боя в случае "
+"тяжелых ранений. ЛКМ - включение."
 
 #: guitext:307
 msgctxt "In-game interface description"
 msgid "Imprison: Your creatures stun their enemies in battle and imprison those they defeat. LMB select."
-msgstr "Заключать в тюрьму: Ваши создания будут оглушать врагов во время боя и отправлять их в тюрьму. ЛКМ - выбор."
+msgstr ""
+"Заключать в тюрьму: Ваши создания будут оглушать врагов во время боя и отправлять их в тюрьму. ЛКМ - включение."
 
 #: guitext:308
 msgctxt "In-game interface description"
 msgid "Defending: The creature is concentrating on avoiding its adversary's blows."
-msgstr "Защищаться: Создание будет стараться уклоняться от ударов врага."
+msgstr "Защищающиеся: Создания, старающиеся уклоняться от ударов врага."
 
 #: guitext:309
 msgctxt "In-game interface item"
@@ -2418,12 +2421,12 @@ msgstr "Пауза"
 #: guitext:321
 msgctxt "In-game interface description"
 msgid "Zoom In: Zoom in the Dynamic Map. This increases the scale of the map. LMB select."
-msgstr "Увеличение: Увеличивает динамическую карту, что увеличивает её масштаб. ЛКМ - выбор."
+msgstr "Увеличение: Приближает динамическую карту, что увеличивает её масштаб. ЛКМ - выбор."
 
 #: guitext:322
 msgctxt "In-game interface description"
 msgid "Zoom Out: Zoom out the Dynamic Map. This decreases the scale of the map. LMB select."
-msgstr "Уменьшение: Уменьшает динамическую карту, что уменьшает её масштаб. ЛКМ - выбор."
+msgstr "Уменьшение: Отдаляет динамическую карту, что уменьшает её масштаб. ЛКМ - выбор."
 
 #: guitext:323
 msgctxt "In-game interface description"
@@ -2491,12 +2494,12 @@ msgstr "Ничья земля: Незахваченная земля. Вы мо�
 #: guitext:332
 msgctxt "Slab description"
 msgid "Claimed area: Your dungeon territory. You can build rooms and drop your creatures on it."
-msgstr "Захваченная область: Территория Вашего подземелья. На ней Вы можете строить помещения и бросать созданий."
+msgstr "Захваченная территория: Территория Вашего подземелья. На ней Вы можете строить помещения и бросать созданий."
 
 #: guitext:333
 msgctxt "In-game interface item"
 msgid "More..."
-msgstr "Еще..."
+msgstr "Подробнее..."
 
 #: guitext:334
 msgctxt "In-game message"
@@ -2506,7 +2509,7 @@ msgstr "Миссия выполнена. Нажмите <Escape> для прод
 #: guitext:335
 msgctxt "In-game message"
 msgid "You have been defeated. Press Space to restart."
-msgstr "Вы потерпели поражение. Нажмите <Пробел>, чтобы сыграть карту заново."
+msgstr "Вы потерпели поражение. Нажмите <Пробел>, чтобы перезапустить миссию."
 
 #: guitext:336
 msgctxt "On-screen message"
@@ -2541,7 +2544,7 @@ msgstr "Музыка"
 #: guitext:342
 msgctxt "In-game interface item"
 msgid "UNUSED"
-msgstr "НЕ ИСПОЛЬЗУЕТСЯ"
+msgstr "НЕ ЗАНЯТО"
 
 #: guitext:344
 msgctxt "Menu interface item"
@@ -2561,7 +2564,7 @@ msgstr "Продолжить игру"
 #: guitext:347
 msgctxt "Menu interface, Main Menu item"
 msgid "Multiplayer"
-msgstr "Мультиплеер"
+msgstr "Игра по сети"
 
 #: guitext:348
 msgctxt "Menu interface item"
@@ -2575,8 +2578,8 @@ msgstr "Показать вступление"
 
 #: guitext:350
 msgctxt "Menu interface item"
-msgid "Service Menu"
-msgstr "Меню протоколов"
+msgid "Multiplayer Menu"
+msgstr "Игра по сети"
 
 #: guitext:351
 msgctxt "Menu interface item"
@@ -2731,7 +2734,7 @@ msgstr "Продюсер"
 #: guitext:381
 msgctxt "Credits"
 msgid "Level Design"
-msgstr "Левел-дизайн"
+msgstr "Дизайн уровней"
 
 #: guitext:382
 msgctxt "Credits"
@@ -2786,7 +2789,7 @@ msgstr "Контроль качества"
 #: guitext:392
 msgctxt "Credits"
 msgid "Lead Level Design"
-msgstr "Ведущие левел-дизайнеры"
+msgstr "Ведущие дизайнеры уровней"
 
 #: guitext:393
 msgctxt "Credits"
@@ -2800,8 +2803,8 @@ msgstr "Тестировщики"
 
 #: guitext:395
 msgctxt "Menu interface item"
-msgid "Sessions"
-msgstr "Сеансы"
+msgid "Game Lobbies"
+msgstr "Доступные лобби"
 
 #: guitext:396
 msgctxt "Menu interface item"
@@ -2810,8 +2813,8 @@ msgstr "Имя"
 
 #: guitext:397
 msgctxt "Menu interface item"
-msgid "Services"
-msgstr "Протокол"
+msgid "Game Modes"
+msgstr "Режимы"
 
 #: guitext:398
 msgctxt "Menu interface item"
@@ -2820,13 +2823,13 @@ msgstr "Сообщения"
 
 #: guitext:399
 msgctxt "Menu interface item"
-msgid "Create Game"
-msgstr "Создать игру"
+msgid "Create Lobby"
+msgstr "Создать лобби"
 
 #: guitext:400
 msgctxt "Menu interface item"
-msgid "Join Game"
-msgstr "Присоединиться к игре"
+msgid "Join Lobby"
+msgstr "Подключиться к лобби"
 
 #: guitext:401
 msgctxt "Menu interface item"
@@ -2835,8 +2838,8 @@ msgstr "Начать игру"
 
 #: guitext:402
 msgctxt "Menu interface item"
-msgid "Game Menu"
-msgstr "Игровое меню"
+msgid "Online Lobbies"
+msgstr "Интернет-лобби"
 
 #: guitext:403
 msgctxt "Menu interface item"
@@ -2952,7 +2955,7 @@ msgstr "Размножить созданий: Создает копию все�
 #: guitext:425
 msgctxt "Dungeon special description"
 msgid "Increase Level: Bestows greater skill on all your creatures."
-msgstr "Увеличить уровень: Улучшает навыки всех Ваших созданий."
+msgstr "Повысить уровень: Улучшает навыки всех Ваших созданий."
 
 #: guitext:426
 msgctxt "Dungeon special description"
@@ -2987,7 +2990,7 @@ msgstr "Таблица рекордов"
 #: guitext:432
 msgctxt "Menu interface item"
 msgid "Go to Query Mode"
-msgstr "Перейти к режиму подробной информации"
+msgstr "Отображение подробных сведений"
 
 #: guitext:433
 msgctxt "Menu interface item"
@@ -3118,8 +3121,8 @@ msgid ""
 "Payday Time: The time until the next Creature Payday. This bar increases over time and, when it reaches its peak, "
 "all of your creatures will want their wages."
 msgstr ""
-"Время до расплаты: Время, оставшееся до следующего Дня выплаты жалования. Полоска увеличивается с течением "
-"времени, и как только она полностью заполнится, все Ваши создания отправятся в сокровищницу за своим жалованием."
+"Время до расплаты: Время до следующего Дня выплаты жалования. Полоска растет, и как только она заполнится, все "
+"Ваши создания отправятся в сокровищницу за своим жалованием."
 
 #: guitext:455
 msgctxt "In-game interface description"
@@ -3135,7 +3138,7 @@ msgid ""
 "Number of Creatures: The number of creatures owned by this Keeper. Allows you to compare your army with other "
 "Keepers."
 msgstr ""
-"Количество созданий: Количество созданий, принадлежащих этому Хранителю. Позволяет сравнить Вашу армию с войсками "
+"Количество созданий: Количество созданий, принадлежащих этому Хранителю. Позволяет сравнить Ваше войско с войсками "
 "других Хранителей."
 
 #: guitext:457
@@ -3179,7 +3182,7 @@ msgstr ""
 #: guitext:464
 msgctxt "In-game interface description"
 msgid "Next Battle: Zoom to the next battle. LMB select."
-msgstr "Следующее сражение: Перейти к следующему сражению. ЛКМ - выбор."
+msgstr "Следующее сражение: Перейти к следующему сражению. ЛКМ - переход."
 
 #: guitext:465
 msgctxt "In-game interface item"
@@ -3513,8 +3516,8 @@ msgstr "Вправо"
 
 #: guitext:531
 msgctxt "Network game message"
-msgid "Initialising Modem"
-msgstr "Инициализация модема"
+msgid "Game version mismatch"
+msgstr "Несоответствмие версий"
 
 #: guitext:532
 msgctxt "Network game message"
@@ -3711,7 +3714,7 @@ msgstr "Shift"
 #: guitext:570
 msgctxt "Keyboard"
 msgid "Control"
-msgstr "Control"
+msgstr "Ctrl"
 
 #: guitext:571
 msgctxt "Keyboard"
@@ -3741,7 +3744,7 @@ msgstr "Инсталлятор"
 #: guitext:576
 msgctxt "Credits"
 msgid "Additional Level Design"
-msgstr "Дополнительный левел-дизайн"
+msgstr "Дополнительный дизайн уровней"
 
 #: guitext:577 guitext:863
 msgctxt "Credits"
@@ -3784,7 +3787,7 @@ msgid ""
 "Boulder Trap: A rolling rock that crushes everything in its path. Triggered when an enemy creature is close and "
 "within line of sight, or when slapped by a Keeper. LMB select. RMB zoom."
 msgstr ""
-"Ловушка-валун: При срабатывании прокатывается гигантский валун, сметающий все на своем пути. Срабатывает, если "
+"Ловушка-валун: При срабатывании выкатывается гигантский валун, сметающий все на своем пути. Срабатывает, если "
 "рядом находится вражеское создание или же если по ловушке шлепнет рука Хранителя. ЛКМ - выбор, ПКМ - отображение."
 
 #: guitext:585
@@ -3802,7 +3805,7 @@ msgid ""
 "inhale it. LMB select. RMB zoom."
 msgstr ""
 "Ловушка с ядовитым газом: При активации окутывает врага облаком ядовитых паров. Наносит урон созданиям владельца, "
-"если они вдохнут их. ЛКМ - выбор, ПКМ - отображение."
+"если они вдохнут газ. ЛКМ - выбор, ПКМ - отображение."
 
 #: guitext:587
 msgctxt "Trap description"
@@ -3819,8 +3822,8 @@ msgid ""
 "Word of Power Trap: Radiates devastating rings of demonic energy, pushing and damaging all enemy creatures within "
 "range. LMB select. RMB zoom."
 msgstr ""
-"Ловушка со Словом Силы: Вызывает появление колец демонической энергии, которые отбрасывают всех созданий врага в "
-"зоне действия заклинания и наносят им урон. ЛКМ - выбор, ПКМ - отображение."
+"Ловушка со Словом Силы: Вызывает появление колец темной энергии, которые отбрасывают всех созданий врага в зоне "
+"действия заклинания и наносят им урон. ЛКМ - выбор, ПКМ - отображение."
 
 #: guitext:589
 msgctxt "Trap description"
@@ -3828,8 +3831,8 @@ msgid ""
 "Lava Trap: The tile disintegrates revealing a pool of molten lava. Effects are irreversible, so a Bridge is needed "
 "to be able to step on the affected area again. LMB select. RMB zoom."
 msgstr ""
-"Ловушка с лавой: При активации этой ловушки пол проваливается в бассейн с лавой. Эффект ловушки перманентный, "
-"поэтому чтобы перейти через провал, нужно строить мост. ЛКМ - выбор, ПКМ - отображение."
+"Ловушка с лавой: При активации этой ловушки пол проваливается в бассейн с лавой. Чтобы перейти через провал, нужно "
+"строить мост. ЛКМ - выбор, ПКМ - отображение."
 
 #: guitext:590
 msgctxt "Door name"
@@ -3862,14 +3865,14 @@ msgstr ""
 msgctxt "Door description"
 msgid "Braced Door: A wooden door reinforced with iron to last longer. LMB select. RMB zoom."
 msgstr ""
-"Окованная дверь: Деревянная дверь, усиленная железными пластинами, что придает ей некоторую прочность. ЛКМ - "
-"выбор, ПКМ - отображение."
+"Окованная дверь: Деревянная дверь, усиленная железными пластинами, что придает ей большую прочность. ЛКМ - выбор, "
+"ПКМ - отображение."
 
 #: guitext:596
 msgctxt "Door description"
 msgid "Iron Door: Strong, heavy door capable of sustaining massive damage. LMB select. RMB zoom."
 msgstr ""
-"Железная дверь: Тяжелая, прочная дверь, способная выдержать множество ударов. ЛКМ - выбор, ПКМ - отображение."
+"Железная дверь: Тяжелая, прочная дверь, способная выдержать сильнейшие удары. ЛКМ - выбор, ПКМ - отображение."
 
 #: guitext:597
 msgctxt "Door description"
@@ -4099,7 +4102,7 @@ msgstr "Ускорить чудище"
 #: guitext:638
 msgctxt "Keeper spell name"
 msgid "Protect Monster"
-msgstr "Защищать чудище"
+msgstr "Защитить чудище"
 
 #: guitext:639
 msgctxt "Keeper spell name"
@@ -4119,7 +4122,7 @@ msgstr "Превратить в цыпленка"
 #: guitext:642
 msgctxt "Keeper spell name"
 msgid "Disease"
-msgstr "Болезнь"
+msgstr "Заразить"
 
 #: guitext:643
 msgctxt "Keeper spell name"
@@ -4144,12 +4147,12 @@ msgstr "Армагеддон"
 #: guitext:647
 msgctxt "Keeper spell description"
 msgid "Possess Creature: Control a creature directly. LMB select. [18.1]"
-msgstr "Вселиться в создание: Прямое управление созданием. ЛКМ - выбрать создание. [18.1]"
+msgstr "Вселиться в создание: Управляйте созданием лично. ЛКМ - выбрать создание. [18.1]"
 
 #: guitext:648
 msgctxt "Keeper spell description"
 msgid "Create Imp: Summon a new Imp anywhere in your dungeon. LMB select."
-msgstr "Создать беса: Создает беса в любой части Вашего подземелья. ЛКМ - выбор."
+msgstr "Создать беса: Материализует беса в любой части Вашего подземелья. ЛКМ - выбор."
 
 #: guitext:649
 msgctxt "Keeper spell description"
@@ -4164,7 +4167,7 @@ msgid ""
 msgstr ""
 "К оружию!: Призывает всех созданий в зоне действия в выбранное место. ЛКМ - выбор. Сначала наколдуйте заклинание в "
 "группе существ, чтобы собрать их, а затем повторно примените его, чтобы указать им место назначения. ПКМ - "
-"отображение; ЛКМ - отмена. [18.6]"
+"отображение, ЛКМ - отмена. [18.6]"
 
 #: guitext:651
 msgctxt "Keeper spell description"
@@ -4189,7 +4192,7 @@ msgstr "Ускорить чудище: Увеличивает скорость �
 #: guitext:655
 msgctxt "Keeper spell description"
 msgid "Protect Monster: Shields your creatures from attack. LMB select."
-msgstr "Защищать чудище: Защищает Ваших созданий от атак. ЛКМ - выбор."
+msgstr "Защитить чудище: Защищает Ваших созданий от атак. ЛКМ - выбор."
 
 #: guitext:656
 msgctxt "Keeper spell description"
@@ -4209,7 +4212,7 @@ msgstr "Превратить в цыпленка: Делает из врага �
 #: guitext:659
 msgctxt "Keeper spell description"
 msgid "Disease: Inflicts a deadly plague on an enemy creature. LMB select. [18.14]"
-msgstr "Болезнь: Заражает вражеское создание смертельной чумой. ЛКМ - выбор. [18.14]"
+msgstr "Заразить: Заражает вражеское создание смертельной чумой. ЛКМ - выбор. [18.14]"
 
 #: guitext:660
 msgctxt "Keeper spell description"
@@ -4263,7 +4266,7 @@ msgstr "Новое помещение захвачено"
 #: guitext:669
 msgctxt "Game event name"
 msgid "New area discovered"
-msgstr "Открыта новая область"
+msgstr "Новая область открыта"
 
 #: guitext:670
 msgctxt "Game event name"
@@ -4278,7 +4281,7 @@ msgstr "Помещение потеряно"
 #: guitext:672
 msgctxt "Game event name"
 msgid "Heart attacked"
-msgstr "Сердце атаковано"
+msgstr "Нападение на сердце"
 
 #: guitext:673
 msgctxt "Game event name"
@@ -4338,7 +4341,7 @@ msgstr "Сработала сигнализация"
 #: guitext:684
 msgctxt "Game event name"
 msgid "Room under attack"
-msgstr "Помещение атаковано"
+msgstr "Помещение громят"
 
 #: guitext:685
 msgctxt "Game event name"
@@ -4373,7 +4376,7 @@ msgstr "Сокровищница переполнена: ЛКМ - разверн
 #: guitext:691
 msgctxt "Game event description"
 msgid "Creature being scavenged: LMB toggle. RMB delete."
-msgstr "Создание растлевают: ЛКМ - показать, ПКМ - удалить."
+msgstr "Создание растлевают: ЛКМ - развернуть, ПКМ - удалить."
 
 #: guitext:692
 msgctxt "Game event description"
@@ -4408,7 +4411,7 @@ msgstr "Помещение утрачено: ЛКМ - развернуть, ПК
 #: guitext:698
 msgctxt "Game event description"
 msgid "Dungeon Heart Attacked: LMB toggle. RMB delete."
-msgstr "Сердце подземелья атаковано: ЛКМ - развернуть, ПКМ - удалить."
+msgstr "На сердце подземелья напали: ЛКМ - развернуть, ПКМ - удалить."
 
 #: guitext:699
 msgctxt "Game event description"
@@ -4423,7 +4426,7 @@ msgstr "Задача: ЛКМ - развернуть. [11.3]"
 #: guitext:701
 msgctxt "Game event description"
 msgid "Breach: LMB toggle. RMB delete."
-msgstr "Пролом: ЛКМ - развернуть, ПКМ - удалить."
+msgstr "Пролом в стене: ЛКМ - развернуть, ПКМ - удалить."
 
 #: guitext:702
 msgctxt "Game event description"
@@ -4433,7 +4436,7 @@ msgstr "Открыто новое заклинание: ЛКМ - разверн�
 #: guitext:703
 msgctxt "Game event description"
 msgid "New room researched: LMB toggle. RMB delete."
-msgstr "Новое помещение разработано: ЛКМ - развернуть, ПКМ - удалить."
+msgstr "Разработано новое помещение: ЛКМ - развернуть, ПКМ - удалить."
 
 #: guitext:704
 msgctxt "Game event description"
@@ -4468,7 +4471,7 @@ msgstr "Сработала сигнализация: ЛКМ - развернут
 #: guitext:710
 msgctxt "Game event description"
 msgid "Room under attack: LMB toggle. RMB delete."
-msgstr "Помещение атаковано: ЛКМ - развернуть, ПКМ - удалить."
+msgstr "Помещение громят: ЛКМ - развернуть, ПКМ - удалить."
 
 #: guitext:711
 msgctxt "Game event description"
@@ -4558,7 +4561,7 @@ msgstr "Выйти из игры: Возврат на карту кампани�
 #: guitext:728
 msgctxt "In-game interface description"
 msgid "Computer Assistance Menu: Customise the Computer Assistant. [3.2.4]"
-msgstr "Меню настройки ИИ-помощника: Позволяет включить и настроить компьютерного помощника. [3.2.4]"
+msgstr "Меню настройки ИИ-помощника: Включение и настройка компьютерного помощника. [3.2.4]"
 
 #: guitext:729
 msgctxt "In-game interface description"
@@ -4591,12 +4594,12 @@ msgstr "ИИ-помощник - надсмотрщик: Перемещает с�
 msgctxt "In-game interface description"
 msgid "Pick up creatures: LMB All creatures. Ctrl LMB Experienced Creatures. RMB Zoom. [22.2.1]"
 msgstr ""
-"Схватить созданий: ЛКМ - схватить всех созданий, Ctrl + ЛКМ - схватить опытных созданий, ПКМ - отобразить. [22.2 1]"
+"Схватить созданий: ЛКМ - схватить всех созданий, Ctrl + ЛКМ - схватить опытных созданий, ПКМ - отобразить. [22.2.1]"
 
 #: guitext:734
 msgctxt "In-game interface description"
 msgid "Pick idle creatures: LMB Pick up creature. RMB Zoom. [22.2.1]"
-msgstr "Схватить бездельничающих созданий: ЛКМ - схватить создание, ПКМ - отобразить. [22.2 1]"
+msgstr "Схватить бездельничающих созданий: ЛКМ - схватить создание, ПКМ - отобразить. [22.2.1]"
 
 #: guitext:735
 msgctxt "In-game interface description"
@@ -5103,7 +5106,7 @@ msgstr ""
 msgctxt "In-game hint message"
 msgid "If your creatures get unhappy, slap some sense into them. They'll soon realise how lucky they are."
 msgstr ""
-"Если Ваши создания теряют голову с тоски, пара увесистых пощечин поможет им вернуть голову на место, и очень скоро "
+"Если Ваши создания теряют голову с тоски, пара увесистых пощечин поможет им вернуть её на место, и очень скоро "
 "они осознают, как мало нужно для счастья на самом деле."
 
 #: guitext:832
@@ -5266,7 +5269,7 @@ msgstr "Сценарий"
 #: guitext:861
 msgctxt "Credits"
 msgid "Voice Over"
-msgstr "Голос свыше"
+msgstr "Озвучение"
 
 #: guitext:862
 msgctxt "Credits"
@@ -5325,18 +5328,18 @@ msgstr "4 игрока"
 
 #: guitext:874
 msgctxt "Menu interface, Network service item"
-msgid "Serial"
-msgstr "Нуль-модем"
+msgid "Online"
+msgstr "Интернет"
 
 #: guitext:875
 msgctxt "Menu interface, Network service item"
-msgid "Modem"
-msgstr "Модем"
+msgid "LAN"
+msgstr "Локальная сеть"
 
 #: guitext:876
 msgctxt "Menu interface, Network service item"
-msgid "IPX"
-msgstr "IPX"
+msgid "Skirmish"
+msgstr "Скирмиш"
 
 #: guitext:877
 msgctxt "World direction"
@@ -5401,17 +5404,17 @@ msgstr "Новые карты"
 #: guitext:889
 msgctxt "Menu interface message"
 msgid "Manufacturable: Creatures can manufacture this item in the Workshop."
-msgstr "Можно изготовить: создания могут изготовить этот предмет в мастерской."
+msgstr "Можно изготовить: Создания могут изготовить этот предмет в мастерской."
 
 #: guitext:890
 msgctxt "Menu interface message"
 msgid "Workshop too small: Expand the Workshop to manufacture this item."
-msgstr "Мастерская слишком мала: расширьте её, чтобы изготовить этот предмет."
+msgstr "Мастерская слишком мала: Расширьте мастерскую, чтобы изготовить этот предмет."
 
 #: guitext:891
 msgctxt "Menu interface message"
 msgid "Not manufacturable: This item cannot be manufactured."
-msgstr "Изготовление невозможно: этот предмет нельзя изготовить."
+msgstr "Изготовление невозможно: Этот предмет невозможно изготовить."
 
 #. DD Level Korros Tor first objective
 #: guitext:892
@@ -5421,7 +5424,7 @@ msgid ""
 "domination, but beware of bands of heroes hidden in the caverns."
 msgstr ""
 "Два других Хранителя подземелья оспаривают Ваши права на это королевство. Уничтожьте обоих, что позволит Вам "
-"безраздельно властвовать над этими землями, но не забывайте о шайках героев, засевших в пещерах."
+"безраздельно властвовать над этими землями, но не забывайте о шайках героев, бродящих по пещерам."
 
 #. DD Level Kari-Mar first objective
 #: guitext:893
@@ -5451,8 +5454,8 @@ msgid ""
 "The Lord of the Land and his pitiful band of followers lie dead. Good riddance to them and their sad, happy lives. "
 "Now seize your chance and attack your rival Keeper. Domination awaits."
 msgstr ""
-"Лорд страны и презренная горстка его соратников мертвы. Тем лучше для них и их унылой счастливой жизни. "
-"Используйте Свой шанс и атакуйте Своего соперника. Безраздельное господство ждет."
+"Лорд этой страны и презренная горстка его соратников мертвы. Тем лучше для них и их унылой счастливой жизни. "
+"Используйте Свой шанс и набросьтесь на Своего соперника. Безраздельное господство ждет."
 
 #. DD Level Pladitz first objective
 #: guitext:896
@@ -5462,7 +5465,7 @@ msgid ""
 "own dungeon between you to halt your conquest. Destroy him and the enemy Keeper to reign supreme."
 msgstr ""
 "Вы и Ваш соперник, другой Хранитель, сошлись в битве за владычество над этим королевством, но лорд страны построил "
-"свое собственное подземелье между вами, чтобы положить конец распрям. Уничтожьте обоих, чтобы получить "
+"свое собственное подземелье между вами, чтобы сорвать Ваши захватнические планы. Уничтожьте обоих, чтобы получить "
 "безраздельный контроль над этими землями."
 
 #. DD Level Pladitz waypoint objective
@@ -5473,8 +5476,7 @@ msgid ""
 "secrets to aid your conquest."
 msgstr ""
 "Вы неплохо поработали, что позволило Вам зайти так далеко, но впереди Вас ждут новые испытания. Чем тщательнее Вы "
-"будете исследовать территорию этой страны, тем больше сможете найти секретов, которые помогут в дальнейших "
-"завоеваниях."
+"будете исследовать подземелье, тем больше сможете найти секретов, которые помогут в дальнейших завоеваниях."
 
 #. DD Level Abbadon first objective
 #: guitext:898
@@ -5510,9 +5512,7 @@ msgstr ""
 #: guitext:901
 msgctxt "In-game message"
 msgid "Ancient powers lie hidden in this realm. Seek them out and use them for your own evil purposes."
-msgstr ""
-"Древние силы сокрыты в этом королевстве. Найдите их источник и используйте эти силы в Своих собственных дурных "
-"целях."
+msgstr "Древние силы сокрыты в этом королевстве. Разыщите их и используйте в Своих собственных дурных целях."
 
 #. DD Level Abbadon objective after rooms built
 #: guitext:902
@@ -5521,7 +5521,7 @@ msgid ""
 "A foolish challenger stands between you and total dominance. Annihilate his forces and feed his body to your "
 "ravenous minions."
 msgstr ""
-"Глупый конкурент стоит между Вами и безраздельным господством. Истребите его силы и скормите его тело Своим "
+"Глупый конкурент стоит между Вами и безраздельным господством. Истребите его силы и скормите его тело Вашим "
 "ненасытным прислужникам."
 
 #. DD Level Daka-Gorn information after AP reached
@@ -5582,7 +5582,7 @@ msgid ""
 "His anger will make him a valuable asset to your army of evil."
 msgstr ""
 "Замурованный в камне жестокими героями и спасенный Вами вампир хочет мести за свое заключение. Его гнев сделает "
-"его ценным бойцом Вашей армии зла."
+"его ценным ресурсом Вашей армии зла."
 
 #. DD Level Batezek first objective
 #: guitext:909
@@ -5611,8 +5611,8 @@ msgid ""
 "Only one Dungeon Keeper can reign victorious over this land. Do not suffer a humiliating defeat Keeper, the "
 "penalty for such failure is torture and death."
 msgstr ""
-"Только один Хранитель подземелья может безраздельно править этой страной. А наградой за унизительное поражение, "
-"Хранитель, станут пытки и смерть."
+"Только один Хранитель подземелья может безраздельно править этой страной. А наградой - если Вы потерпите "
+"унизительное поражение, Хранитель - станут пытки и смерть."
 
 #. DD Level Caddis Fell first objective
 #: guitext:913
@@ -5629,7 +5629,7 @@ msgid ""
 "challenger to the north ..."
 msgstr ""
 "Поздравляю, Хранитель! Вы собрали действительно мощную армию. Но пока не время для самодовольства - y Вас есть еще "
-"один соперник на севере."
+"один соперник на севере..."
 
 #. DD Level Caddis Fell objective after player1 destroyed
 #: guitext:915
@@ -5639,7 +5639,7 @@ msgid ""
 "challenger to the south ..."
 msgstr ""
 "Поздравляю, Хранитель! Вы собрали действительно мощную армию. Но пока не время для самодовольства - y Вас есть еще "
-"один соперник на юге."
+"один соперник на юге..."
 
 #. DD Level Caddis Fell objective after entrance claimed
 #: guitext:916
@@ -5648,7 +5648,7 @@ msgid ""
 "The Lord of the Land is a pathetic individual who breeds fluffy bunnies. Pound him into the ground and then "
 "destroy the rival Keeper to achieve total domination."
 msgstr ""
-"Лорд этой страны - никчемный человечек, который разводит пушистых зайчиков. Повергните его во прах, а потом "
+"Лорд этой страны - никчемный человечек, который разводит пушистых зайчишек. Повергните его во прах, а потом "
 "уничтожьте Хранителя-конкурента и станьте безраздельным властелином этих земель."
 
 #. DD Level Kanasko first objective
@@ -5725,8 +5725,8 @@ msgid ""
 "A devious Wizard has cheated you of your magical powers. Use your only Spider and explore the realm. Find the "
 "Wizard, kill him and make an example of his foolishness."
 msgstr ""
-"Подлый волшебник обманом лишил Вас колдовских сил. У Вас есть лишь один паук, который будет разведывать "
-"территорию. Найдите Волшебника, убейте его, и пусть его безрассудство послужит примером для других."
+"Подлый волшебник обманом лишил Вас колдовских сил. У Вас есть лишь один паук, который будет исследовать "
+"королевство. Найдите Волшебника, убейте его, и пусть его безрассудство послужит примером."
 
 #. DD Level Dixaroc information after getting Imps
 #: guitext:926
@@ -5775,7 +5775,7 @@ msgstr "Пеpед вами лежат владения Волшебника. О�
 msgctxt "In-game message"
 msgid "Your magical powers are restored Keeper. You can finally show these fools what you are made of."
 msgstr ""
-"Ваши колдовские силы восстановлены, Хранитель. Теперь-то Вы, наконец, покажете этим безумцам, из какого Вы теста."
+"Ваши колдовские силы вернулись, Хранитель. Теперь-то Вы, наконец, покажете этим безумцам, из какого Вы теста."
 
 #. DD Level Caddis Fell objective after AP reached
 #: guitext:933
@@ -5822,12 +5822,12 @@ msgstr "Обнаружена потайная дверь"
 #: guitext:939
 msgctxt "Game event description"
 msgid "Enemy spotted your Secret Door: LMB toggle. RMB delete."
-msgstr "Враг заметил вашу потайную дверь: ЛКМ - развернуть, ПКМ - удалить."
+msgstr "Враг заметил Вашу потайную дверь: ЛКМ - развернуть, ПКМ - удалить."
 
 #: guitext:940
 msgctxt "Game event name"
 msgid "Enemy spotted your secret door"
-msgstr "Враг заметил вашу потайную дверь"
+msgstr "Враг заметил Вашу потайную дверь"
 
 #: guitext:941
 msgctxt "Menu interface, Main Menu item"
@@ -5962,7 +5962,7 @@ msgid ""
 "Hand Of Evil: Ability to pick up your creatures and hold them in your hand. Just don't hold them forever, or they "
 "may get irritated."
 msgstr ""
-"Рука зла: Возможность хватать созданий и удерживать их Своей рукой. Главное - не увлекайтесь: это их раздражает."
+"Рука зла: Возможность хватать созданий и удерживать их Своей рукой. Главное - не увлекайтесь. Это их раздражает."
 
 #: guitext:964
 msgctxt "Keeper spell description"
@@ -5994,7 +5994,7 @@ msgstr "Вернуться к списку карт"
 
 #: guitext:969
 msgctxt "Menu interface item"
-msgid "Map packs"
+msgid "Map Packs"
 msgstr "Наборы карт"
 
 #: guitext:970
@@ -6027,7 +6027,17 @@ msgctxt "Menu interface item"
 msgid "Lost Levels"
 msgstr "Вырезанные карты"
 
-#: guitext:976 guitext:977 guitext:978 guitext:979 guitext:980
+#: guitext:976
+msgctxt "Menu interface item"
+msgid "Modern Levels"
+msgstr "Современные карты"
+
+#: guitext:977
+msgctxt "Menu interface item"
+msgid "Bullfrog Levels"
+msgstr "Карты Bullfrog"
+
+#: guitext:978 guitext:979 guitext:980
 msgctxt "Unused"
 msgid "Moo3"
 msgstr "Му3"
@@ -6110,12 +6120,12 @@ msgstr "Потайная дверь"
 #: guitext:996
 msgctxt "Mouse"
 msgid "Scroll Wheel Up"
-msgstr "Колесо мыши вверх"
+msgstr "Прокрутка вверх"
 
 #: guitext:997
 msgctxt "Mouse"
 msgid "Scroll Wheel Down"
-msgstr "Колесо мыши вниз"
+msgstr "Прокрутка вниз"
 
 #: guitext:998
 msgctxt "Mouse"
@@ -6125,12 +6135,12 @@ msgstr "Кнопка мыши"
 #: guitext:999
 msgctxt "Game controls"
 msgid "Build Square Room"
-msgstr "Построить квадратную комнату"
+msgstr "Построить квадр. помещение"
 
 #: guitext:1000
 msgctxt "Game controls"
 msgid "Detect Room"
-msgstr "Выделить пространство комнаты"
+msgstr "Выделить простр. помещения"
 
 #: guitext:1001
 msgctxt "Game controls"
@@ -6208,7 +6218,7 @@ msgstr "Навьюченные бесы"
 #: guitext:1015
 msgctxt "Menu interface item"
 msgid "Conquest of the Arctic"
-msgstr "Завоевание Арктики"
+msgstr "Покорение Арктики"
 
 #: guitext:1016
 msgctxt "Menu interface item"
@@ -6388,7 +6398,7 @@ msgstr "Скальное основание: Незахваченная скал
 #: guitext:1052
 msgctxt "Slab description"
 msgid "Dense Gold Seam: Holds a lot of wealth for your Imps to extract."
-msgstr "Богатая золотая жила: Источник золотых гор для разработки и перенесения в сокровищницу Вашими бесами."
+msgstr "Богатая золотая жила: Источник золотых гор для разработки и переноса в сокровищницу Вашими бесами."
 
 #: guitext:1053
 msgctxt "Keeper spell name"
@@ -6398,12 +6408,12 @@ msgstr "Магический щит"
 #: guitext:1054
 msgctxt "Keeper spell name"
 msgid "Freeze"
-msgstr "Заморозка"
+msgstr "Заморозить"
 
 #: guitext:1055
 msgctxt "Keeper spell name"
 msgid "Slow"
-msgstr "Замедление"
+msgstr "Замедлить"
 
 #: guitext:1056
 msgctxt "Keeper spell name"
@@ -6413,7 +6423,7 @@ msgstr "Левитировать"
 #: guitext:1057
 msgctxt "Keeper spell name"
 msgid "Illumination"
-msgstr "Освещение"
+msgstr "Осветить"
 
 #: guitext:1058
 msgctxt "Keeper spell name"
@@ -6458,17 +6468,17 @@ msgstr "Сбросить наклон"
 #: guitext:1066
 msgctxt "Creature spell"
 msgid "Heal Monster: The target creature is massively healed."
-msgstr "Излечить чудище: Эффективно излечивает целевое создание."
+msgstr "Излечение чудища: Эффективно излечивает целевое создание."
 
 #: guitext:1067
 msgctxt "Creature spell"
 msgid "Cleanse: Cures all negative effects inflicted on the creature."
-msgstr "Очистить: Снимает все негативные воздействия, наложенные на создание."
+msgstr "Очищение: Снимает все негативные воздействия, наложенные на создание."
 
 #: guitext:1068
 msgctxt "Creature spell"
 msgid "Cleanse Monster: Cures all negative effects inflicted on target creature."
-msgstr "Очистить чудище: Снимает все негативные воздействия, наложенные на целевое создание."
+msgstr "Очищение чудища: Снимает все негативные воздействия, наложенные на целевое создание."
 
 #: guitext:1069
 msgctxt "Keeper spell description"
@@ -6526,9 +6536,189 @@ msgstr "Опуститься"
 #: guitext:1080
 msgctxt "Creature spell"
 msgid "Familiar: Summons a companion to guard and assist the creature."
-msgstr "Призвать фамильяра: Призывает спутника, защищающего создание и помогающего ему."
+msgstr "Призыв фамильяра: Призывает спутника, защищающего создание и помогающего ему."
 
 #: guitext:1081
 msgctxt "Creature spell"
 msgid "Summon: Call upon temporary guardians to assist the creature in combat."
-msgstr "Призвать создание: На время призывает хранителей, помогающих призвавшему их созданию в битве."
+msgstr "Призыв создания: На время призывает хранителей, помогающих призвавшему их созданию в битве."
+
+#: guitext:1082
+msgctxt "Highscore Default Name"
+msgid "Keeper"
+msgstr "Хранитель"
+
+#: guitext:1083
+msgctxt "Game controls"
+msgid "Screen Capture"
+msgstr "Запись экрана"
+
+#: guitext:1084
+msgctxt "Game controls"
+msgid "Screenshot"
+msgstr "Снимок экрана"
+
+#: guitext:1085
+msgctxt "Game controls"
+msgid "Frame Skip Increase"
+msgstr "Увеличить пропуск кадров"
+
+#: guitext:1086
+msgctxt "Game controls"
+msgid "Frame Skip Decrease"
+msgstr "Уменьшить пропуск кадров"
+
+#: guitext:1087
+msgctxt "Game controls"
+msgid "Zoom Minimap In"
+msgstr "Увеличить мини-карту"
+
+#: guitext:1088
+msgctxt "Game controls"
+msgid "Zoom Minimap Out"
+msgstr "Уменьшить мини-карту"
+
+#: guitext:1089
+msgctxt "Game controls"
+msgid "Next Ability"
+msgstr "Следующая способность"
+
+#: guitext:1090
+msgctxt "Game controls"
+msgid "Previous Ability"
+msgstr "Предыдущая способность"
+
+#: guitext:1091
+msgctxt "Menu interface item"
+msgid "Online Lobby"
+msgstr "Интернет-лобби"
+
+#: guitext:1092
+msgctxt "Menu interface item"
+msgid "LAN Lobby"
+msgstr "Локальное лобби"
+
+#: guitext:1093
+msgctxt "Menu interface item"
+msgid "LAN Lobbies"
+msgstr "Локальные лобби"
+
+#: guitext:1094
+msgctxt "Game controls"
+msgid "Toggle Gui"
+msgstr "Вкл./выкл. интерфейс"
+
+#: guitext:1095
+msgctxt "Game controls"
+msgid "Toggle Tooltips"
+msgstr "Вкл./выкл. всплыв. подсказки"
+
+#: guitext:1096 guitext:1097 guitext:1098
+msgctxt "Unused string"
+msgid "Moo"
+msgstr "Му"
+
+#: guitext:1099
+msgctxt "Game controls"
+msgid "Exit Game"
+msgstr "Выход из игры"
+
+#: guitext:1100
+msgctxt "Game controls"
+msgid "Disable Packet Mode"
+msgstr "В реплее - Перехват управления"
+
+#: guitext:1101
+msgctxt "Game controls"
+msgid "Switch Screen Res"
+msgstr "Изменение разрешения"
+
+#: guitext:1102
+msgctxt "Game controls"
+msgid "Toggle Console"
+msgstr "Откр./закр. консоль"
+
+#: guitext:1103
+msgctxt "Game controls"
+msgid "Finish Level"
+msgstr "Завершить уровень"
+
+#: guitext:1104
+msgctxt "Game controls"
+msgid "Options Menu"
+msgstr "Меню настроек"
+
+#: guitext:1105
+msgctxt "Game controls"
+msgid "Toggle Hero Health Flowers"
+msgstr "Вкл./выкл. цветок здоровья"
+
+#: guitext:1106
+msgctxt "Keyboard"
+msgid "Grave"
+msgstr "Гравис"
+
+#: guitext:1107
+msgctxt "Game controls"
+msgid "Teleport Last Workroom"
+msgstr "В созд. - К посл. рабочему месту"
+
+#: guitext:1108
+msgctxt "Game controls"
+msgid "Teleport Call To Arms"
+msgstr "В созд. - К знамени "К оружию!""
+
+#: guitext:1109
+msgctxt "Game controls"
+msgid "Teleport Default"
+msgstr "В созд. - К личному логову"
+
+#: guitext:1110
+msgctxt "Menu interface item"
+msgid "Multiplayer Map Packs"
+msgstr "Многопользовательские карты"
+
+#: guitext:1111
+msgctxt "Menu interface item"
+msgid "Return to Lobby"
+msgstr "Вернуться в лобби"
+
+#: guitext:1112
+msgctxt "In-game message"
+msgid "You have been defeated. As host, keep the game running until the match concludes."
+msgstr "Вы проиграли. Оставьте игру запущенной до окончания матча, поскольку вы её хост."
+
+#: guitext:1113
+msgctxt "Network game message"
+msgid "Verify /fxdata/ is the same across all PCs."
+msgstr "Убедитесь, что содержимое директории fxdata идентично у всех игроков."
+
+#: guitext:1114
+msgctxt "Network game message"
+msgid "WARNING: Custom sprite mismatch with %s!"
+msgstr "ВНИМАНИЕ! Несовпадение спрайтов с игроком %s! "
+
+#: guitext:1115
+msgctxt "Network game message"
+msgid "I am the computer now!"
+msgstr "За меня играет компьютер!"
+
+#: guitext:1116
+msgctxt "Network game message"
+msgid "%s has left the game."
+msgstr "%s покинул игру."
+
+#: guitext:1117
+msgctxt "Network game message"
+msgid "%s has disconnected."
+msgstr "%s отсоединился."
+
+#: guitext:1118
+msgctxt "Unused"
+msgid "unused"
+msgstr "Не используется"
+
+#: guitext:1119
+msgctxt "Network game message"
+msgid "Network connection to host lost"
+msgstr "Соединение с хостом разорвано"

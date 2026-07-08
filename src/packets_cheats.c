@@ -29,6 +29,7 @@
 #include "creature_states.h"
 #include "kjm_input.h"
 #include "bflib_sound.h"
+#include "config_sounds.h"
 #include "thing_effects.h"
 #include "config_effects.h"
 #include "map_utils.h"
@@ -87,7 +88,7 @@ TbBool packets_process_cheats(
             {
                 if (is_my_player(player))
                 {
-                    play_non_3d_sample(119);
+                    play_non_3d_sample(snd_refusal);
                 }
             }
             unset_packet_control(pckt, PCtr_LBtnRelease);
@@ -103,7 +104,7 @@ TbBool packets_process_cheats(
         }
         else
         {
-            struct CreatureModelConfig* crconf = &game.conf.crtr_conf.model[player->cheatselection.chosen_hero_kind];
+            struct CreatureModelConfig* crconf = creature_stats_get(player->cheatselection.chosen_hero_kind);
             snprintf(str, sizeof(str), "%s %d", get_string(crconf->namestr_idx), player->cheatselection.chosen_experience_level + 1);
         }
         targeted_message_add(MsgType_Player, player->cheatselection.chosen_player, plyr_idx, 1, "%s", str);
@@ -122,7 +123,7 @@ TbBool packets_process_cheats(
                         {
                             continue;
                         }
-                        struct CreatureModelConfig* crconf = &game.conf.crtr_conf.model[crmodel];
+                        struct CreatureModelConfig* crconf = creature_stats_get(crmodel);
                         if ((crconf->model_flags & CMF_IsSpectator) != 0)
                         {
                             continue;
@@ -146,7 +147,7 @@ TbBool packets_process_cheats(
             {
                 if (is_my_player(player))
                 {
-                    play_non_3d_sample(119);
+                    play_non_3d_sample(snd_refusal);
                 }
             }
             unset_packet_control(pckt, PCtr_LBtnRelease);
@@ -180,7 +181,7 @@ TbBool packets_process_cheats(
             {
                 if (is_my_player(player))
                 {
-                    play_non_3d_sample(119);
+                    play_non_3d_sample(snd_refusal);
                 }
             }
             unset_packet_control(pckt, PCtr_LBtnRelease);
@@ -231,7 +232,7 @@ TbBool packets_process_cheats(
               {
                 if (is_my_player(player))
                 {
-                    play_non_3d_sample(119);
+                    play_non_3d_sample(snd_refusal);
                 }
               }
             }
@@ -260,7 +261,7 @@ TbBool packets_process_cheats(
         }
         else
         {
-            struct CreatureModelConfig* crconf = &game.conf.crtr_conf.model[player->cheatselection.chosen_creature_kind];
+            struct CreatureModelConfig* crconf = creature_stats_get(player->cheatselection.chosen_creature_kind);
             snprintf(str, sizeof(str), "%s %d", get_string(crconf->namestr_idx), player->cheatselection.chosen_experience_level + 1);
         }
         targeted_message_add(MsgType_Player, player->cheatselection.chosen_player, plyr_idx, 1, "%s", str);
@@ -275,7 +276,7 @@ TbBool packets_process_cheats(
                     while (1)
                     {
                         crmodel = GAME_RANDOM(game.conf.crtr_conf.model_count) + 1;
-                        struct CreatureModelConfig* crconf = &game.conf.crtr_conf.model[crmodel];
+                        struct CreatureModelConfig* crconf = creature_stats_get(crmodel);
                         if ((crconf->model_flags & CMF_IsSpectator) != 0) {
                             continue;
                         }
@@ -297,7 +298,7 @@ TbBool packets_process_cheats(
             {
                 if (is_my_player(player))
                 {
-                    play_non_3d_sample(119);
+                    play_non_3d_sample(snd_refusal);
                 }
             }
             unset_packet_control(pckt, PCtr_LBtnRelease);
@@ -473,7 +474,7 @@ TbBool packets_process_cheats(
             {
                 if (is_my_player(player))
                 {
-                    play_non_3d_sample(119);
+                    play_non_3d_sample(snd_refusal);
                 }
             }
             unset_packet_control(pckt, PCtr_LBtnRelease);
@@ -767,11 +768,12 @@ TbBool packets_process_cheats(
 
 TbBool process_players_global_cheats_packet_action(PlayerNumber plyr_idx, struct Packet* pckt)
 {
+  struct PlayerInfo* player;
   switch (pckt->action)
   {
       case PckA_CheatEnter:
     //      game.???[my_player_number].cheat_mode = 1;
-          show_onscreen_msg(2*game_num_fps, "Cheat mode activated by player %d", plyr_idx);
+          show_onscreen_msg(2*turns_per_second, "Cheat mode activated by player %d", plyr_idx);
           return true;
       case PckA_CheatAllFree:
           make_all_creatures_free();
@@ -783,7 +785,7 @@ TbBool process_players_global_cheats_packet_action(PlayerNumber plyr_idx, struct
           return false;
       case PckA_CheatRevealMap:
       {
-          struct PlayerInfo* player = get_player(plyr_idx);
+          player = get_player(plyr_idx);
           reveal_whole_map(player);
           return false;
       }
@@ -802,7 +804,7 @@ TbBool process_players_global_cheats_packet_action(PlayerNumber plyr_idx, struct
           return false;
       case PckA_CheatSwitchTerrain:
         {
-            struct PlayerInfo* player = get_player(plyr_idx);
+            player = get_player(plyr_idx);
             player->cheatselection.chosen_terrain_kind = pckt->actn_par1;
             if (slab_kind_has_no_ownership(player->cheatselection.chosen_terrain_kind))
             {
@@ -813,26 +815,26 @@ TbBool process_players_global_cheats_packet_action(PlayerNumber plyr_idx, struct
         }
       case PckA_CheatSwitchPlayer:
         {
-            struct PlayerInfo* player = get_player(plyr_idx);
+            player = get_player(plyr_idx);
             clear_messages_from_player(MsgType_Player, player->cheatselection.chosen_player);
             player->cheatselection.chosen_player = pckt->actn_par1;
             return false;
         }
       case PckA_CheatSwitchCreature:
         {
-            struct PlayerInfo* player = get_player(plyr_idx);
+            player = get_player(plyr_idx);
             player->cheatselection.chosen_creature_kind = pckt->actn_par1;
             return false;
         }
       case PckA_CheatSwitchHero:
         {
-            struct PlayerInfo* player = get_player(plyr_idx);
+            player = get_player(plyr_idx);
             player->cheatselection.chosen_hero_kind = pckt->actn_par1;
             return false;
         }
       case PckA_CheatSwitchExperience:
         {
-            struct PlayerInfo* player = get_player(plyr_idx);
+            player = get_player(plyr_idx);
             player->cheatselection.chosen_experience_level = pckt->actn_par1;
             return false;
         }
@@ -866,6 +868,69 @@ TbBool process_players_global_cheats_packet_action(PlayerNumber plyr_idx, struct
             update_trap_tab_to_config();
             return false;
         }
+		case PckA_CheatWinLevel:
+		{
+			player = get_player(plyr_idx);
+			set_player_as_won_level(player);
+			return false;
+		}
+		case PckA_CheatLoseLevel:
+		{
+			player = get_player(plyr_idx);
+			set_player_as_lost_level(player);
+			return false;
+		}
+		case PckA_CheatLevelUp:
+		{
+			player = get_player(plyr_idx);
+			struct Thing* thing = thing_get(player->controlled_thing_idx);
+			creature_increase_level(thing);
+			return false;
+		}
+		case PckA_CheatLevelDown:
+		{
+			player = get_player(plyr_idx);
+			struct Thing* thing = thing_get(player->controlled_thing_idx);
+			struct CreatureControl* cctrl = creature_control_get_from_thing(thing);
+            if (!creature_control_invalid(cctrl))
+            {
+                set_creature_level(thing, cctrl->exp_level-1);
+            }
+			return false;
+		}
+		case PckA_CheatApplySpell:
+		{
+			player = get_player(plyr_idx);
+			struct Thing* thing = thing_get(player->controlled_thing_idx);
+			struct SpellConfig* spconf = get_spell_config(pckt->actn_par1);
+			SoundSmplTblID smptbl_idx;
+			if (spconf->caster_affected)
+			{
+				if (spconf->caster_affect_sound > 0)
+				{
+					smptbl_idx = spconf->caster_affect_sound + SOUND_RANDOM(spconf->caster_sounds_count);
+				}
+				else
+				{
+					smptbl_idx = 0;
+				}
+			}
+			else
+			{
+				struct PowerConfigStats *powerst = get_power_model_stats(spconf->linked_power);
+				smptbl_idx = powerst->select_sound_idx;
+			}
+			thing_play_sample(thing, smptbl_idx, NORMAL_PITCH, 0, 3, 0, 4, FULL_LOUDNESS);
+			apply_spell_effect_to_thing(thing, pckt->actn_par1, SPELL_MAX_LEVEL, plyr_idx);
+			return false;
+		}
+		case PckA_CheatKillCreature:
+		{
+			player = get_player(plyr_idx);
+			struct Thing* thing = thing_get(player->controlled_thing_idx);
+			kill_creature(thing, INVALID_THING, -1, CrDed_NoUnconscious);
+			return false;
+		}
         default:
           return false;
   }
@@ -945,7 +1010,7 @@ TbBool process_players_dungeon_control_cheats_packet_action(PlayerNumber plyr_id
                     pos.z.val = subtile_coord_center(1);
                     if (is_my_player(player))
                     {
-                        play_non_3d_sample(76);
+                        play_non_3d_sample(snd_spell_stars);
                     }
                     create_effect(&pos, imp_spangle_effects[get_player_color_idx(id)], id);
                 }
@@ -953,7 +1018,7 @@ TbBool process_players_dungeon_control_cheats_packet_action(PlayerNumber plyr_id
                 {
                     if (is_my_player(player))
                     {
-                        play_non_3d_sample(41);
+                        play_non_3d_sample(snd_spell_wall);
                     }
                     for (long n = 0; n < SMALL_AROUND_LENGTH; n++)
                     {
@@ -996,7 +1061,7 @@ TbBool process_players_dungeon_control_cheats_packet_action(PlayerNumber plyr_id
                 {
                     if (is_my_player(player))
                     {
-                        play_non_3d_sample(116);
+                        play_non_3d_sample(snd_room_claim);
                     }
                     create_effects_on_room_slabs(room, imp_spangle_effects[get_player_color_idx(pckt->actn_par1)], 0, pckt->actn_par1);
                 }

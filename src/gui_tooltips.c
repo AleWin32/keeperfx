@@ -63,6 +63,9 @@ float render_tooltip_scroll_offset; // Rendering float
 float render_tooltip_scroll_timer; // Rendering float
 struct ToolTipBox tool_tip_box;
 
+
+struct TooltipDebugInfo tool_tip_dbg = {0};
+
 /******************************************************************************/
 static inline void reset_scrolling_tooltip(void)
 {
@@ -245,7 +248,7 @@ TbBool setup_object_tooltips(struct Coord3d *pos)
                 update_gui_tooltip_target(thing);
                 if ((help_tip_time > 20) || (player->work_state == PSt_CreatrQuery))
                 {
-                    struct CreatureModelConfig* crconf = &game.conf.crtr_conf.model[objst->related_creatr_model];
+                    struct CreatureModelConfig* crconf = creature_stats_get(objst->related_creatr_model);
                     const struct RoomConfigStats* roomst = get_room_kind_stats(RoK_LAIR);     //TODO use a separate string for creature lair object than for lair room
                     set_gui_tooltip_box_fmt(5, "%s %s", get_string(crconf->namestr_idx), get_string(roomst->name_stridx)); // (creature) Lair
                 }
@@ -278,12 +281,18 @@ short setup_land_tooltips(struct Coord3d *pos)
       if (cursor_moved_to_new_subtile(player) || thing_exists(handthing)) {
           return false;
       }
-      if (help_tip_time <= 50) {
+      unsigned short delay_time = tool_tip_dbg.land_coord ? 10 : 50;
+      if (help_tip_time <= delay_time) {
           help_tip_time++;
           return true;
       }
   }
-  set_gui_tooltip_box_fmt(2, "%s", get_string(slabst->tooltip_stridx));
+
+  char str_pos[256] = {0};
+  if (tool_tip_dbg.land_coord)
+      sprintf(str_pos, "[debug - slab=%d,%d / subtile=%d,%d / coord=%d,%d]: ", (int)subtile_slab(pos->x.stl.num), (int)subtile_slab(pos->y.stl.num), (int)pos->x.stl.num, (int)pos->y.stl.num, (int)pos->x.val, (int)pos->y.val);
+
+  set_gui_tooltip_box_fmt(2, "%s%s", str_pos, get_string(slabst->tooltip_stridx));
   return true;
 }
 
@@ -373,7 +382,7 @@ void setup_gui_tooltip(struct GuiButton* gbtn)
             k = get_players_special_digger_model(my_player_number);
         if (k > 0)
         {
-            struct CreatureModelConfig* crconf = &game.conf.crtr_conf.model[k];
+            struct CreatureModelConfig* crconf = creature_stats_get(k);
             set_gui_tooltip_box_fmt(0, "%-6s: %s", get_string(crconf->namestr_idx), text);
         }
     }
@@ -448,13 +457,14 @@ TbBool input_gameplay_tooltips(TbBool gameplay_on)
     struct PlayerInfo* player = get_my_player();
     if ((gameplay_on) && (tool_tip_time == 0) && (!busy_doing_gui))
     {
-        if (player->acamera == NULL)
+      struct Camera *camera = get_player_active_camera(player);
+      if (camera == NULL)
         {
             ERRORLOG("No active camera");
             return false;
         }
         struct Coord3d mappos;
-        if (screen_to_map(get_local_camera(player->acamera), GetMouseX(), GetMouseY(), &mappos))
+      if (screen_to_map(get_local_camera(camera), GetMouseX(), GetMouseY(), &mappos))
         {
             if (subtile_revealed(mappos.x.stl.num,mappos.y.stl.num, player->id_number))
             {
@@ -481,7 +491,7 @@ void toggle_tooltips(void)
   {
     statstr = "off";
   }
-  show_onscreen_msg(2*game_num_fps, "Tooltips %s", statstr);
+  show_onscreen_msg(2*turns_per_second, "Tooltips %s", statstr);
   save_settings();
 }
 
@@ -525,7 +535,7 @@ void draw_tooltip_slab64k(char *tttext, long pos_x, long pos_y, long ttwidth, lo
             draw_slab64k(x, y, units_per_pixel_ui, scale_ui_value_lofi(viswidth), scale_ui_value_lofi(ttheight));
             lbDisplay.DrawFlags = 0;
             int tx_units_per_px, tx, ty;
-            if ( (MyScreenHeight < 400) && (dbc_language > 0) )
+            if ( (MyScreenHeight < 400) && (dbc_initialized && dbc_enabled) )
             {
                 LbTextSetWindow(x, y, scale_ui_value(viswidth * 2), scale_ui_value(ttheight * 2));
                 tx_units_per_px = scale_value_by_horizontal_resolution(32);

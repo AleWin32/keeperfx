@@ -24,6 +24,7 @@
 #include "bflib_math.h"
 #include "bflib_planar.h"
 #include "bflib_sound.h"
+#include "config_sounds.h"
 
 #include "player_data.h"
 #include "player_instances.h"
@@ -70,15 +71,15 @@ extern "C" {
 const long power_sight_close_instance_time[] = {4, 4, 5, 5, 6, 6, 7, 7, 8};
 
 unsigned char destroy_effect[][9] = {
-    {88, 88, 88, 88, 79, 88, 88, 88, 88,},//power_level=0
-    {88, 88, 88, 88, 32, 88, 88, 88, 88,},
-    {88, 88, 88, 79, 32, 79, 88, 88, 88,},
-    {88, 79, 88, 79, 32, 79, 88, 79, 88,},
-    {88, 79, 88, 79, 32, 79, 88, 79, 88,},
-    {88, 88, 88, 32, 32, 32, 88, 88, 88,},
-    {88, 32, 88, 32, 32, 32, 88, 32, 88,},
-    {79, 32, 79, 32, 32, 32, 79, 32, 79,},
-    {32, 32, 32, 32, 32, 32, 32, 32, 32,},//power_level=8
+    {'X','X','X','X','O','X','X','X','X',},//power_level=0
+    {'X','X','X','X',' ','X','X','X','X',},
+    {'X','X','X','O',' ','O','X','X','X',},
+    {'X','O','X','O',' ','O','X','O','X',},
+    {'X','O','X','O',' ','O','X','O','X',},
+    {'X','X','X',' ',' ',' ','X','X','X',},
+    {'X',' ','X',' ',' ',' ','X',' ','X',},
+    {'O',' ','O',' ',' ',' ','O',' ','O',},
+    {' ',' ',' ',' ',' ',' ',' ',' ',' ',},//power_level=8
 };
 
 /******************************************************************************/
@@ -245,7 +246,7 @@ TbBool can_cast_power_on_thing(PlayerNumber plyr_idx, const struct Thing *thing,
     {
         struct PlayerInfo* player;
         player = get_player(plyr_idx);
-        if (game.play_gameturn <= player->power_of_cooldown_turn) {
+        if (get_gameturn() <= player->power_of_cooldown_turn) {
             return false;
         }
     }
@@ -350,7 +351,7 @@ TbBool can_cast_power_on_thing(PlayerNumber plyr_idx, const struct Thing *thing,
         {
             if (thing->owner == plyr_idx) {
                 struct TrapConfigStats *trapst;
-                trapst = &game.conf.trapdoor_conf.trap_cfgstats[thing->model];
+                trapst = get_trap_model_stats(thing->model);
                 if ((trapst->slappable > 0) && trap_is_active(thing)) {
                     return true;
                 }
@@ -360,6 +361,11 @@ TbBool can_cast_power_on_thing(PlayerNumber plyr_idx, const struct Thing *thing,
     if (thing_is_creature(thing))
     {
         struct CreatureControl *cctrl = creature_control_get_from_thing(thing);
+        if (pwkind == PwrK_POSSESS) {
+            if (flag_is_set(get_creature_model_flags(thing), CMF_CannotPossess)) {
+                return false;
+            }
+        }
         if (creature_is_leaving_and_cannot_be_stopped(thing))
         {
             return false;
@@ -678,7 +684,7 @@ TbBool can_cast_power_at_xy(PlayerNumber plyr_idx, PowerKind pwkind, MapSubtlCoo
     {
         struct PlayerInfo *player;
         player = get_player(plyr_idx);
-        if (game.play_gameturn <= player->power_of_cooldown_turn) {
+        if (get_gameturn() <= player->power_of_cooldown_turn) {
             return false;
         }
     }
@@ -871,7 +877,7 @@ long find_spell_age_percentage(PlayerNumber plyr_idx, PowerKind pwkind)
         if (dungeon->sight_casted_thing_idx > 0)
             thing = thing_get(dungeon->sight_casted_thing_idx);
         if (thing_exists(thing)) {
-            curr = game.play_gameturn - thing->creation_turn;
+            curr = get_gameturn() - thing->creation_turn;
             total = powerst->strength[dungeon->sight_casted_power_level] + 8;
         }
         break;
@@ -879,7 +885,7 @@ long find_spell_age_percentage(PlayerNumber plyr_idx, PowerKind pwkind)
         dungeon = get_players_num_dungeon(plyr_idx);
         if (dungeon->cta_start_turn != 0)
         {
-            curr = game.play_gameturn - dungeon->cta_start_turn;
+            curr = get_gameturn() - dungeon->cta_start_turn;
             total = powerst->duration;
         }
         break;
@@ -945,8 +951,8 @@ static TbResult magic_use_power_armageddon(PowerKind power_kind, PlayerNumber pl
     SYNCDBG(6,"Starting");
     unsigned long your_time_gap;
     unsigned long enemy_time_gap;
-    your_time_gap = game.conf.rules[plyr_idx].magic.armageddon_count_down + game.play_gameturn;
-    enemy_time_gap = game.conf.rules[plyr_idx].magic.armageddon_count_down + game.play_gameturn;
+    your_time_gap = game.conf.rules[plyr_idx].magic.armageddon_count_down + get_gameturn();
+    enemy_time_gap = game.conf.rules[plyr_idx].magic.armageddon_count_down + get_gameturn();
     if (game.armageddon_cast_turn != 0) {
         return Lb_OK;
     }
@@ -959,7 +965,7 @@ static TbResult magic_use_power_armageddon(PowerKind power_kind, PlayerNumber pl
             return Lb_OK;
         }
     }
-    game.armageddon_cast_turn = game.play_gameturn;
+    game.armageddon_cast_turn = get_gameturn();
     game.armageddon_caster_idx = plyr_idx;
     struct Thing *heartng;
     heartng = get_player_soul_container(plyr_idx);
@@ -1038,7 +1044,7 @@ static TbResult magic_use_power_obey(PowerKind power_kind, PlayerNumber plyr_idx
     if (dungeon->must_obey_turn != 0) {
         dungeon->must_obey_turn = 0;
     } else {
-        dungeon->must_obey_turn = game.play_gameturn;
+        dungeon->must_obey_turn = get_gameturn();
         if (plyr_idx == my_player_number)
         {
             struct PowerConfigStats *powerst = get_power_model_stats(PwrK_OBEY);
@@ -1072,13 +1078,13 @@ void turn_off_power_sight_of_evil(PlayerNumber plyr_idx)
     power_level = dungeon->sight_casted_power_level;
     if (power_level > POWER_MAX_LEVEL)
         power_level = POWER_MAX_LEVEL;
-    i = game.play_gameturn - dungeon->sight_casted_gameturn;
+    i = get_gameturn() - dungeon->sight_casted_gameturn;
     imax = abs(powerst->strength[power_level]/4) >> 2;
     if (i > imax)
         i = imax;
     if (i < 0)
         i = 0;
-    n = game.play_gameturn - powerst->strength[power_level];
+    n = get_gameturn() - powerst->strength[power_level];
     cit = power_sight_close_instance_time[power_level];
     k = imax / cit;
     if (k < 1) k = 1;
@@ -1100,7 +1106,7 @@ static TbResult magic_use_power_hold_audience(PowerKind power_kind, PlayerNumber
             return Lb_FAIL;
         }
     }
-    dungeon->hold_audience_cast_turn = game.play_gameturn;
+    dungeon->hold_audience_cast_turn = get_gameturn();
     unsigned long k;
     int i;
     k = 0;
@@ -1273,7 +1279,7 @@ static TbResult magic_use_power_imp(PowerKind power_kind, PlayerNumber plyr_idx,
         cctrl->summoner_idx = thing->index;
         cctrl->summon_spl_idx = 0;
         remove_first_creature(thing); //temporary units are not real creatures
-        cctrl->unsummon_turn = game.play_gameturn + powerst->duration;
+        cctrl->unsummon_turn = get_gameturn() + powerst->duration;
         set_flag(cctrl->creature_state_flags, TF2_SummonedCreature);
     }
     if (powerst->strength[power_level] != 0)
@@ -1332,7 +1338,7 @@ static TbResult magic_use_power_tunneller(PowerKind power_kind, PlayerNumber ply
         cctrl->summoner_idx = thing->index;
         cctrl->summon_spl_idx = 0;
         remove_first_creature(thing); //temporary units are not real creatures
-        cctrl->unsummon_turn = game.play_gameturn + powerst->duration;
+        cctrl->unsummon_turn = get_gameturn() + powerst->duration;
         set_flag(cctrl->creature_state_flags, TF2_SummonedCreature);
     }
     initialise_thing_state(thing, CrSt_CreatureHeroEntering);
@@ -1482,7 +1488,7 @@ static TbResult magic_use_power_sight(PowerKind power_kind, PlayerNumber plyr_id
     powerst = get_power_model_stats(PwrK_SIGHT);
     if (player_uses_power_sight(plyr_idx))
     {
-        cdt = game.play_gameturn - dungeon->sight_casted_gameturn;
+        cdt = get_gameturn() - dungeon->sight_casted_gameturn;
         cdlimit = powerst->strength[dungeon->sight_casted_power_level] >> 4;
         if (cdt < 0) {
             cdt = 0;
@@ -1491,7 +1497,7 @@ static TbResult magic_use_power_sight(PowerKind power_kind, PlayerNumber plyr_id
             cdt = cdlimit;
         }
         cit = power_sight_close_instance_time[dungeon->sight_casted_power_level];
-        cgt = game.play_gameturn - powerst->strength[dungeon->sight_casted_power_level];
+        cgt = get_gameturn() - powerst->strength[dungeon->sight_casted_power_level];
         i = cdlimit / cit;
         if (i > 0) {
             dungeon->sight_casted_gameturn = cgt + cdt/i - cit;
@@ -1522,7 +1528,7 @@ static TbResult magic_use_power_sight(PowerKind power_kind, PlayerNumber plyr_id
     thing = create_object(&pos, ObjMdl_PowerSight, plyr_idx, -1);
     if (!thing_is_invalid(thing))
     {
-        dungeon->sight_casted_gameturn = game.play_gameturn;
+        dungeon->sight_casted_gameturn = get_gameturn();
         thing->health = 2;
         dungeon->sight_casted_power_level = power_level;
         dungeon->sight_casted_thing_idx = thing->index;
@@ -1611,6 +1617,8 @@ TbBool update_creature_influenced_by_call_to_arms_at_pos(struct Thing *creatng, 
         creature_stop_affected_by_call_to_arms(creatng);
         return false;
     }
+
+    TbBool is_sleeping = creature_is_sleeping(creatng);
     if (!creature_is_called_to_arms(creatng))
     {
         if (!external_set_thing_state(creatng, CrSt_ArriveAtCallToArms))
@@ -1618,6 +1626,11 @@ TbBool update_creature_influenced_by_call_to_arms_at_pos(struct Thing *creatng, 
             return false;
         }
     }
+    if (is_sleeping) {
+        struct CreatureModelConfig* crconf = creature_stats_get_from_thing(creatng);
+        anger_apply_anger_to_creature(creatng, crconf->annoy_woken_up, AngR_Other, 1);
+    }
+
     setup_person_move_to_coord(creatng, cta_pos, NavRtF_Default);
     creatng->continue_state = CrSt_ArriveAtCallToArms;
     cctrl->called_to_arms = true;
@@ -1717,7 +1730,7 @@ static TbResult magic_use_power_call_to_arms(PowerKind power_kind, PlayerNumber 
               ERRORLOG("Cannot create call to arms");
               return 0;
           }
-          dungeon->cta_start_turn = game.play_gameturn;
+          dungeon->cta_start_turn = get_gameturn();
           dungeon->cta_power_level = power_level;
           dungeon->cta_stl_x = stl_x;
           dungeon->cta_stl_y = stl_y;
@@ -1731,7 +1744,7 @@ static TbResult magic_use_power_call_to_arms(PowerKind power_kind, PlayerNumber 
           SYNCDBG(9,"Created birthing CTA");
           return 1;
     }
-    dungeon->cta_start_turn = game.play_gameturn;
+    dungeon->cta_start_turn = get_gameturn();
     dungeon->cta_stl_x = stl_x;
     dungeon->cta_stl_y = stl_y;
     set_call_to_arms_as_rebirthing(objtng);
@@ -1749,7 +1762,7 @@ static TbResult magic_use_power_slap_thing(PowerKind power_kind, PlayerNumber pl
     }
     player = get_player(plyr_idx);
     dungeon = get_dungeon(player->id_number);
-    if ((player->instance_num == PI_Whip) || (game.play_gameturn - dungeon->last_creature_dropped_gameturn <= 10)) {
+    if ((player->instance_num == PI_Whip) || (get_gameturn() - dungeon->last_creature_dropped_gameturn <= 10)) {
         return Lb_OK;
     }
     player->influenced_thing_idx = thing->index;
@@ -1764,6 +1777,11 @@ static TbResult magic_use_power_possess_thing(PowerKind power_kind, PlayerNumber
     struct PlayerInfo *player;
     if (!thing_exists(thing)) {
         return Lb_FAIL;
+    }
+    if (thing_is_creature(thing)) {
+        if (flag_is_set(get_creature_model_flags(thing), CMF_CannotPossess)) {
+            return Lb_FAIL;
+        }
     }
     player = get_player(plyr_idx);
     player->influenced_thing_idx = thing->index;
@@ -1784,7 +1802,7 @@ static void magic_power_hold_audience_update(PlayerNumber plyr_idx)
     struct Dungeon *dungeon;
     dungeon = get_players_num_dungeon(plyr_idx);
     SYNCDBG(8,"Starting");
-    if ( game.play_gameturn - dungeon->hold_audience_cast_turn <= game.conf.rules[plyr_idx].magic.hold_audience_time) {
+    if ( get_gameturn() - dungeon->hold_audience_cast_turn <= game.conf.rules[plyr_idx].magic.hold_audience_time) {
         return;
     }
     // Dispose hold audience effect
@@ -1835,7 +1853,6 @@ TbBool affect_creature_by_power_call_to_arms(struct Thing *creatng, long range, 
         {
             if (update_creature_influenced_by_call_to_arms_at_pos(creatng, cta_pos))
             {
-                creature_mark_if_woken_up(creatng);
                 return true;
             }
         }
@@ -1890,13 +1907,13 @@ int affect_nearby_creatures_by_power_call_to_arms(PlayerNumber plyr_idx, long ra
 void process_magic_power_call_to_arms(PlayerNumber plyr_idx)
 {
     struct Dungeon *dungeon = get_players_num_dungeon(plyr_idx);
-    long duration = game.play_gameturn - dungeon->cta_start_turn;
+    long duration = get_gameturn() - dungeon->cta_start_turn;
     const struct PowerConfigStats *powerst = get_power_model_stats(PwrK_CALL2ARMS);
     struct SlabMap *slb = get_slabmap_for_subtile(dungeon->cta_stl_x, dungeon->cta_stl_y);
     TbBool free = ((slabmap_owner(slb) == plyr_idx) || dungeon->cta_free);
     if (!free)
     {
-        if ((game.conf.rules[plyr_idx].game.allies_share_cta) && (players_are_mutual_allies(plyr_idx, slabmap_owner(slb))))
+        if ((game.conf.rules[plyr_idx].gameplay.allies_share_cta) && (players_are_mutual_allies(plyr_idx, slabmap_owner(slb))))
         {
             free = true;
         }
@@ -1925,7 +1942,7 @@ void process_magic_power_must_obey(PlayerNumber plyr_idx)
     struct Dungeon *dungeon;
     dungeon = get_players_num_dungeon(plyr_idx);
     long delta;
-    delta = game.play_gameturn - dungeon->must_obey_turn;
+    delta = get_gameturn() - dungeon->must_obey_turn;
     const struct PowerConfigStats *powerst;
     powerst = get_power_model_stats(PwrK_OBEY);
     if ((delta % powerst->duration) == 0)
@@ -1960,7 +1977,7 @@ void process_dungeon_power_magic(void)
             }
             if (game.armageddon_cast_turn > 0)
             {
-                if (game.play_gameturn > game.armageddon_over_turn)
+                if (get_gameturn() > game.armageddon_over_turn)
                 {
                   game.armageddon_cast_turn = 0;
                   game.armageddon_over_turn = 0;
@@ -1997,7 +2014,7 @@ TbResult magic_use_available_power_on_thing(PlayerNumber plyr_idx, PowerKind pwk
         // Make a rejection sound
         if (is_my_player_number(plyr_idx))
         {
-            play_non_3d_sample(119);
+            play_non_3d_sample(snd_refusal);
         }
     }
     return ret;
@@ -2072,7 +2089,7 @@ TbResult magic_use_power_on_thing(PlayerNumber plyr_idx, PowerKind pwkind,
     }
     if (ret == Lb_SUCCESS)
     {
-        get_player(plyr_idx)->power_of_cooldown_turn = game.play_gameturn + powerst->cast_cooldown;
+        get_player(plyr_idx)->power_of_cooldown_turn = get_gameturn() + powerst->cast_cooldown;
     }
     return ret;
 }
@@ -2105,7 +2122,7 @@ TbResult magic_use_available_power_on_subtile(PlayerNumber plyr_idx, PowerKind p
     if (ret == Lb_FAIL) {
         // Make a rejection sound
         if (is_my_player_number(plyr_idx))
-            play_non_3d_sample(119);
+            play_non_3d_sample(snd_refusal);
     }
     return ret;
 }
@@ -2140,7 +2157,7 @@ TbResult magic_use_power_on_subtile(PlayerNumber plyr_idx, PowerKind pwkind,
     if (ret == Lb_SUCCESS)
     {
         const struct PowerConfigStats* powerst = get_power_model_stats(pwkind);
-        get_player(plyr_idx)->power_of_cooldown_turn = game.play_gameturn + powerst->cast_cooldown;
+        get_player(plyr_idx)->power_of_cooldown_turn = get_gameturn() + powerst->cast_cooldown;
     }
     return ret;
 }

@@ -525,7 +525,7 @@ void activate_dungeon_special(struct Thing *cratetng, struct PlayerInfo *player)
             reveal_whole_map(player);
             remove_events_thing_is_attached_to(cratetng);
             used = 1;
-            delete_thing_structure(cratetng, 0);
+            destroy_object(cratetng);
             break;
         case SpcKind_Resurrect:
             start_resurrect_creature(player, cratetng);
@@ -538,20 +538,20 @@ void activate_dungeon_special(struct Thing *cratetng, struct PlayerInfo *player)
             {
                 remove_events_thing_is_attached_to(cratetng);
                 used = 1;
-                delete_thing_structure(cratetng, 0);
+                destroy_object(cratetng);
             }
             break;
         case SpcKind_MultplCrtr:
             multiply_creatures(player);
             remove_events_thing_is_attached_to(cratetng);
             used = 1;
-            delete_thing_structure(cratetng, 0);
+            destroy_object(cratetng);
             break;
         case SpcKind_IncrseLvl:
             increase_level(player, 1);
             remove_events_thing_is_attached_to(cratetng);
             used = 1;
-            delete_thing_structure(cratetng, 0);
+            destroy_object(cratetng);
             break;
         case SpcKind_MakeSafe:
             make_safe(player);
@@ -569,7 +569,7 @@ void activate_dungeon_special(struct Thing *cratetng, struct PlayerInfo *player)
             }
             remove_events_thing_is_attached_to(cratetng);
             used = 1;
-            delete_thing_structure(cratetng, 0);
+            destroy_object(cratetng);
             break;
         case SpcKind_HiddnWorld:
             activate_bonus_level(player);
@@ -581,13 +581,13 @@ void activate_dungeon_special(struct Thing *cratetng, struct PlayerInfo *player)
             do_to_players_all_creatures_of_model(player->id_number, CREATURE_ANY, set_creature_health_to_max_with_heal_effect);
             remove_events_thing_is_attached_to(cratetng);
             used = 1;
-            delete_thing_structure(cratetng, 0);
+            destroy_object(cratetng);
             break;
         case SpcKind_GetGold:
             throw_out_gold(cratetng, specst->value);
             remove_events_thing_is_attached_to(cratetng);
             used = 1;
-            delete_thing_structure(cratetng, 0);
+            destroy_object(cratetng);
             break;
         case SpcKind_MakeAngry:
             for (long i = 0; i < PLAYERS_COUNT; i++)
@@ -599,26 +599,26 @@ void activate_dungeon_special(struct Thing *cratetng, struct PlayerInfo *player)
             }
             remove_events_thing_is_attached_to(cratetng);
             used = 1;
-            delete_thing_structure(cratetng, 0);
+            destroy_object(cratetng);
             break;
         case SpcKind_Custom:
         default:
             if (thing_is_custom_special_box(cratetng))
             {
-                if (game.current_player_turn == game.play_gameturn)
+                if (game.current_player_turn == get_gameturn())
                 {
                     WARNLOG("box activation rejected turn:%u", game.current_player_turn);
                     // If two players suddenly activated box at same turn it is not that we want to
                     return;
                 }
-                game.current_player_turn = game.play_gameturn;
+                game.current_player_turn = get_gameturn();
                 game.script_current_player = player->id_number;
                 memcpy(&game.triggered_object_location, &pos, sizeof(struct Coord3d));
                 dungeon->box_info.activated[cratetng->custom_box.box_kind]++;
                 no_speech = true;
                 remove_events_thing_is_attached_to(cratetng);
                 used = 1;
-                delete_thing_structure(cratetng, 0);
+                destroy_object(cratetng);
                 break;
             }
             else
@@ -631,7 +631,7 @@ void activate_dungeon_special(struct Thing *cratetng, struct PlayerInfo *player)
         {
             if (is_my_player(player) && !no_speech)
             {
-                output_message(specst->speech, 0);
+                play_speech_ref(&specst->speech, 0);
             }
             create_used_effect_or_element(&pos, specst->effect_id, player->id_number, cratetng->index);
         }
@@ -660,7 +660,7 @@ void resurrect_creature(struct Thing *boxtng, PlayerNumber owner, ThingModel crm
     create_used_effect_or_element(&boxtng->mappos, specst->effect_id, owner, boxtng->index);
     remove_events_thing_is_attached_to(boxtng);
     force_any_creature_dragging_owned_thing_to_drop_it(boxtng);
-    if ((game.conf.rules[owner].game.classic_bugs_flags & ClscBug_ResurrectForever) == 0) {
+    if ((game.conf.rules[owner].gameplay.classic_bugs_flags & ClscBug_ResurrectForever) == 0) {
         remove_item_from_dead_creature_list(get_players_num_dungeon(owner), crmodel, exp_level);
     }
     delete_thing_structure(boxtng, 0);

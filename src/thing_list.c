@@ -94,9 +94,16 @@ const struct NamedCommand class_commands[] = {
 
 /******************************************************************************/
 
-void set_previous_thing_position(struct Thing *thing) {
+static void update_thing_interpolation(struct Thing *thing)
+{
     thing->previous_mappos = thing->mappos;
     thing->previous_floor_height = thing->floor_height;
+
+    // Originally cleared by the renderer after drawing one frame.
+    clear_flag(thing->rendering_flags, TRF_BeingHit);
+
+    // Signal to reset interpolation on attached armour/disease particle effect.
+    clear_flag(thing->state_flags, TF1_Teleported);
 }
 
 /**
@@ -993,6 +1000,7 @@ void update_things_in_list(struct StructureList *list)
       }
       i = thing->next_of_class;
       // Per-thing code
+      update_thing_interpolation(thing);
       if ((thing->alloc_flags & TAlF_IsFollowingLeader) == 0)
       {
           if ((thing->alloc_flags & TAlF_IsInLimbo) != 0) {
@@ -1001,7 +1009,6 @@ void update_things_in_list(struct StructureList *list)
               update_thing(thing);
           }
       }
-      set_previous_thing_position(thing);
       // Per-thing code ends
       k++;
       if (k > THINGS_COUNT)
@@ -1103,7 +1110,6 @@ unsigned long update_creatures_not_in_list(void)
         update_thing(thing);
       }
     }
-    set_previous_thing_position(thing);
     // Per-thing code ends
     k++;
     if (k > THINGS_COUNT)
@@ -1134,7 +1140,7 @@ void update_things(void)
     update_things_in_list(&game.thing_lists[TngList_Doors]);
     update_things_sounds_in_list(&game.thing_lists[TngList_AmbientSnds]);
     update_cave_in_things();
-    game.map_changed_for_nagivation = 0;
+    game.map_changed_for_navigation = 0;
     SYNCDBG(9,"Finished");
 }
 
@@ -1980,7 +1986,7 @@ TbBool lord_of_the_land_in_prison_or_tortured(void)
 {
     for (long crtr_model = 0; crtr_model < game.conf.crtr_conf.model_count; crtr_model++)
     {
-        struct CreatureModelConfig* crconf = &game.conf.crtr_conf.model[crtr_model];
+        struct CreatureModelConfig* crconf = creature_stats_get(crtr_model);
         if ((crconf->model_flags & CMF_IsLordOfLand) != 0)
         {
             struct Thing* thing = creature_of_model_in_prison_or_tortured(crtr_model);
@@ -2000,7 +2006,7 @@ struct Thing *lord_of_the_land_find(void)
 {
     for (long crtr_model = 1; crtr_model < game.conf.crtr_conf.model_count; crtr_model++)
     {
-        struct CreatureModelConfig* crconf = &game.conf.crtr_conf.model[crtr_model];
+        struct CreatureModelConfig* crconf = creature_stats_get(crtr_model);
         if ((crconf->model_flags & CMF_IsLordOfLand) != 0)
         {
             int i = creature_of_model_find_first(crtr_model);
@@ -3583,7 +3589,7 @@ TbBool gold_pile_with_maximum_at_xy(MapSubtlCoord stl_x, MapSubtlCoord stl_y)
         // Per thing processing block
         if ((thing->class_id == TCls_Object) && (object_is_gold_laying_on_ground(thing)))
         {
-            if (thing->valuable.gold_stored >= game.conf.rules[thing->owner].game.gold_pile_maximum)
+            if (thing->valuable.gold_stored >= game.conf.rules[thing->owner].gameplay.gold_pile_maximum)
             {
                 return true;
             }
@@ -4010,7 +4016,7 @@ TbBool setup_creature_leave_or_die_if_possible(struct Thing *thing)
             force_any_creature_dragging_thing_to_drop_it(thing);
             // Drop creature if it's in hand
             if (thing_is_picked_up(thing)) {
-                if ((game.conf.rules[thing->owner].game.classic_bugs_flags & ClscBug_NoHandPurgeOnDefeat) != 0) {
+                if ((game.conf.rules[thing->owner].gameplay.classic_bugs_flags & ClscBug_NoHandPurgeOnDefeat) != 0) {
                     SYNCDBG(19,"Skipped %s index %d due to classic bug",thing_model_name(thing),(int)thing->index);
                     return false;
                 }
@@ -4034,7 +4040,7 @@ TbBool setup_creature_die_if_not_in_custody(struct Thing *thing)
         force_any_creature_dragging_thing_to_drop_it(thing);
         // Drop creature if it's in hand
         if (thing_is_picked_up(thing)) {
-            if ((game.conf.rules[thing->owner].game.classic_bugs_flags & ClscBug_NoHandPurgeOnDefeat) != 0) {
+            if ((game.conf.rules[thing->owner].gameplay.classic_bugs_flags & ClscBug_NoHandPurgeOnDefeat) != 0) {
                 SYNCDBG(19,"Skipped %s index %d due to classic bug",thing_model_name(thing),(int)thing->index);
                 return false;
             }
@@ -4113,7 +4119,7 @@ long count_creatures_in_dungeon_of_model_flags(const struct Dungeon *dungeon, un
     long count = 0;
     for (ThingModel crmodel = 1; crmodel < game.conf.crtr_conf.model_count; crmodel++)
     {
-        struct CreatureModelConfig* crconf = &game.conf.crtr_conf.model[crmodel];
+        struct CreatureModelConfig* crconf = creature_stats_get(crmodel);
         if (((crconf->model_flags & need_mdflags) == need_mdflags) &&
            ((crconf->model_flags & excl_mdflags) == 0))
         {
@@ -4128,7 +4134,7 @@ long count_creatures_in_dungeon_controlled_and_of_model_flags(const struct Dunge
     long count = 0;
     for (ThingModel crmodel = 1; crmodel < game.conf.crtr_conf.model_count; crmodel++)
     {
-        struct CreatureModelConfig* crconf = &game.conf.crtr_conf.model[crmodel];
+        struct CreatureModelConfig* crconf = creature_stats_get(crmodel);
         if (((crconf->model_flags & need_mdflags) == need_mdflags) &&
            ((crconf->model_flags & excl_mdflags) == 0))
         {

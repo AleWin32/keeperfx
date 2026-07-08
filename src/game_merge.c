@@ -41,7 +41,7 @@ unsigned long game_flags2 = 0;
 TbBool emulate_integer_overflow(unsigned short nbits)
 {
     if (nbits == 8)
-        return (game.conf.rules[0].game.classic_bugs_flags & ClscBug_Overflow8bitVal) != 0;
+        return (game.conf.rules[0].gameplay.classic_bugs_flags & ClscBug_Overflow8bitVal) != 0;
     return false;
 }
 
@@ -88,6 +88,19 @@ LevelNumber set_continue_level_number(LevelNumber lvnum)
 LevelNumber get_selected_level_number(void)
 {
   return game.selected_level_number;
+}
+
+/**
+ * Returns the selected level number. Checks both selected and loaded number for best guess.
+ */
+LevelNumber get_level_number(void)
+{
+    LevelNumber lvnum = get_selected_level_number();
+    if (lvnum <= 0)
+    {
+        lvnum = get_loaded_level_number();
+    }
+    return lvnum;
 }
 
 /**

@@ -19,13 +19,14 @@
 #include "pre_inc.h"
 #include "dungeon_data.h"
 
+#include <inttypes.h>
 #include "globals.h"
 #include "bflib_basics.h"
 #include "config_terrain.h"
 #include "game_legacy.h"
 #include "player_instances.h"
 #include "gui_soundmsgs.h"
-#include "bflib_inputctrl.h"
+#include "bflib_joyst.h"
 #include "post_inc.h"
 
 /******************************************************************************/
@@ -214,10 +215,10 @@ void add_heart_health(PlayerNumber plyr_idx,HitPoints healthdelta,TbBool warn_on
     {
         struct ObjectConfigStats* objst = get_object_model_stats(heartng->model);
         long old_health = heartng->health;
-        long long new_health = heartng->health + healthdelta;
+        int64_t new_health = heartng->health + healthdelta;
         if (new_health > objst->health)
         {
-            SCRIPTDBG(7,"Player %u's calculated heart health (%I64d) is greater than maximum: %d", heartng->owner, new_health, objst->health);
+            SCRIPTDBG(7,"Player %u's calculated heart health (%" PRId64 ") is greater than maximum: %d", heartng->owner, new_health, objst->health);
             new_health = objst->health;
         }
         heartng->health = new_health;
@@ -292,9 +293,9 @@ TbBool player_creature_tends_to(PlayerNumber plyr_idx, unsigned short tend_type)
     switch (tend_type)
     {
     case CrTend_Imprison:
-        return ((dungeon->creature_tendencies & 0x01) != 0);
+        return ((dungeon->creature_tendencies & CrTend_Imprison) != 0);
     case CrTend_Flee:
-        return ((dungeon->creature_tendencies & 0x02) != 0);
+        return ((dungeon->creature_tendencies & CrTend_Flee) != 0);
     default:
         ERRORLOG("Bad tendency type %d",(int)tend_type);
         return false;
@@ -307,14 +308,14 @@ TbBool toggle_creature_tendencies(struct PlayerInfo *player, unsigned short tend
     switch (tend_type)
     {
     case CrTend_Imprison:
-        dungeon->creature_tendencies ^= 0x01;
+        dungeon->creature_tendencies ^= CrTend_Imprison;
         return true;
     case CrTend_Flee:
-        dungeon->creature_tendencies ^= 0x02;
+        dungeon->creature_tendencies ^= CrTend_Flee;
         return true;
     case CrTend_Imprison | CrTend_Flee:
         // Toggle both tendencies when combined value is passed
-        dungeon->creature_tendencies ^= 0x03; // 0x01 | 0x02
+        dungeon->creature_tendencies ^= (CrTend_Imprison | CrTend_Flee);
         return true;
     default:
         ERRORLOG("Can't toggle tendency; bad tendency type %d",(int)tend_type);
@@ -332,10 +333,10 @@ TbBool set_creature_tendencies(struct PlayerInfo *player, unsigned short tend_ty
     switch (tend_type)
     {
     case CrTend_Imprison:
-        set_flag_value(dungeon->creature_tendencies, 0x01, val);
+        set_flag_value(dungeon->creature_tendencies, CrTend_Imprison, val);
         return true;
     case CrTend_Flee:
-        set_flag_value(dungeon->creature_tendencies, 0x02, val);
+        set_flag_value(dungeon->creature_tendencies, CrTend_Flee, val);
         return true;
     default:
         ERRORLOG("Can't set tendency; bad tendency type %d",(int)tend_type);
@@ -440,7 +441,7 @@ TbBool restart_script_timer(PlayerNumber plyr_idx, int32_t timer_id)
         return false;
     }
     dungeon->turn_timers[timer_id].state = 1;
-    dungeon->turn_timers[timer_id].count = game.play_gameturn;
+    dungeon->turn_timers[timer_id].count = get_gameturn();
     return true;
 }
 

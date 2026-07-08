@@ -753,7 +753,7 @@ TbBool update_screen_mode_data(long width, long height)
   // Main menu scaling: Campaign map "land view" screen (including the window frame)
   calculate_landview_upp(width, height, LANDVIEW_MAP_WIDTH, LANDVIEW_MAP_HEIGHT); // 16 is "kfx default" for 640x480 game window (1x), a 960x720 frame (1.5x), and a 1280x960 landview (2x)
 
-  LbMouseChangeMoveRatio(base_mouse_sensitivity*units_per_pixel/16, base_mouse_sensitivity*units_per_pixel/16);
+  LbMouseChangeMoveRatio(base_mouse_sensitivity, base_mouse_sensitivity);
   LbMouseSetPointerHotspot(0, 0);
   LbScreenSetGraphicsWindow(0, 0, MyScreenWidth/pixel_size, MyScreenHeight/pixel_size);
   LbTextSetWindow(0, 0, MyScreenWidth/pixel_size, MyScreenHeight/pixel_size);
@@ -981,12 +981,12 @@ TbBool switch_to_next_video_mode(void)
   {
     if (failsafe)
     {
-      show_onscreen_msg(game_num_fps * 6, "%s", get_string(856));
+      show_onscreen_msg(turns_per_second * 6, "%s", get_string(856));
     }
     else
     {
       // we managed to switch to a new mode
-      show_onscreen_msg(game_num_fps * 6, "%s", get_vidmode_name(scrmode));
+      show_onscreen_msg(turns_per_second * 6, "%s", get_vidmode_name(scrmode));
       settings.switching_vidmodes_index = i;
       save_settings();
     }

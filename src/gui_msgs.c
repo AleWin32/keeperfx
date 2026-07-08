@@ -50,7 +50,7 @@ void message_draw(void)
         ps_units_per_px = (22 * units_per_pixel) / spr->SHeight;
     }
     TbBool low_res = (MyScreenHeight < 400);
-    int tx_units_per_px = ( (low_res) && (dbc_language > 0) ) ? ps_units_per_px : (22 * units_per_pixel) / LbTextLineHeight();
+    int tx_units_per_px = ( (low_res) && (dbc_initialized && dbc_enabled) ) ? ps_units_per_px : (22 * units_per_pixel) / LbTextLineHeight();
     int h = LbTextLineHeight();
     long y = 28 * units_per_pixel / 16;
     if (game.armageddon_cast_turn != 0)
@@ -80,7 +80,7 @@ void message_draw(void)
                     }
                     else if (game.messages[i].plyr_idx == game.neutral_player_num)
                     {
-                        spr_idx = ((game.play_gameturn >> 1) & 3) + GPS_plyrsym_symbol_player_red_std_b;
+                        spr_idx = ((get_gameturn() >> 1) & 3) + GPS_plyrsym_symbol_player_red_std_b;
                         plyr_idx = 0;
                     }
                     else
@@ -203,7 +203,7 @@ void message_update(void)
     while (i >= 0)
     {
         struct GuiMessage* gmsg = &game.messages[i];
-        if (game.play_gameturn > gmsg->expiration_turn)
+        if (get_gameturn() > gmsg->expiration_turn)
         {
             game.active_messages_count--;
             game.messages[game.active_messages_count].text[0] = 0;
@@ -258,7 +258,7 @@ void message_add(char type, PlayerNumber plyr_idx, const char *text)
     }
     snprintf(game.messages[0].text, sizeof(game.messages[0].text), "%s", text);
     game.messages[0].plyr_idx = plyr_idx;
-    game.messages[0].expiration_turn = game.play_gameturn + GUI_MESSAGES_DELAY;
+    game.messages[0].expiration_turn = get_gameturn() + GUI_MESSAGES_DELAY;
     game.messages[0].target_idx = -1;
     game.messages[0].type = type;
     if (game.active_messages_count < GUI_MESSAGES_COUNT) {
@@ -289,7 +289,7 @@ void targeted_message_add(char type, PlayerNumber plyr_idx, PlayerNumber target_
     }
     snprintf(game.messages[0].text, sizeof(game.messages[0].text), "%s", full_msg_text);
     game.messages[0].plyr_idx = plyr_idx;
-    game.messages[0].expiration_turn = game.play_gameturn + timeout;
+    game.messages[0].expiration_turn = get_gameturn() + timeout;
     game.messages[0].target_idx = target_idx;
     game.messages[0].type = type;
     if (game.active_messages_count < GUI_MESSAGES_COUNT) {
@@ -302,13 +302,13 @@ void show_game_time_taken(unsigned long fps, unsigned long turns)
 {
     struct GameTime gt = get_game_time(turns, fps);
     struct PlayerInfo* player = get_my_player();
-    targeted_message_add(MsgType_Player, player->id_number, player->id_number, GUI_MESSAGES_DELAY, "%s: %02ld:%02ld:%02ld", get_string(746), gt.Hours, gt.Minutes, gt.Seconds);
+    targeted_message_add(MsgType_Player, player->id_number, player->id_number, GUI_MESSAGES_DELAY, "%s: %02ld:%02ld:%02ld", get_string(GUIStr_Time), gt.Hours, gt.Minutes, gt.Seconds);
 }
 
 void show_real_time_taken(void)
 {
     update_time();
     struct PlayerInfo* player = get_my_player();
-    targeted_message_add(MsgType_Player, player->id_number, player->id_number, GUI_MESSAGES_DELAY, "%s: %02ld:%02ld:%02ld:%03ld", get_string(746), Timer.Hours, Timer.Minutes, Timer.Seconds, Timer.MSeconds);
+    targeted_message_add(MsgType_Player, player->id_number, player->id_number, GUI_MESSAGES_DELAY, "%s: %02ld:%02ld:%02ld:%03ld", get_string(GUIStr_Time), Timer.Hours, Timer.Minutes, Timer.Seconds, Timer.MSeconds);
 }
 /******************************************************************************/

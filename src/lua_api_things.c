@@ -22,8 +22,12 @@
 #include "power_specials.h"
 #include "thing_creature.h"
 #include "thing_effects.h"
+#include "thing_physics.h"
 #include "magic_powers.h"
 #include "config_crtrstates.h"
+#include "creature_states_mood.h"
+#include "thing_stats.h"
+#include "local_camera.h"
 
 #include "lua_base.h"
 #include "lua_params.h"
@@ -37,8 +41,6 @@ static int thing_set_field(lua_State *L);
 static int thing_get_field(lua_State *L);
 
 static const struct luaL_Reg thing_methods[];
-
-
 
 
 /**********************************************/
@@ -59,6 +61,28 @@ static int make_thing_zombie (lua_State *L)
     return 0;
 }
 
+static int lua_set_velocity (lua_State *L)
+{
+    struct Thing *thing = luaL_checkThing(L, 1);
+    int32_t speed = luaL_checkinteger(L, 2);
+    int16_t angle_xy = thing->move_angle_xy;
+    int16_t angle_z = thing->move_angle_z;
+
+    if (!lua_isnoneornil(L, 3))
+        angle_xy = luaL_optCheckinteger(L, 3);
+    if (!lua_isnoneornil(L, 4))
+        angle_z = luaL_optCheckinteger(L, 4);
+
+    struct ComponentVector cvect;
+    angles_to_vector(angle_xy, angle_z, speed, &cvect);
+    thing->veloc_push_add.x.val += cvect.x;
+    thing->veloc_push_add.y.val += cvect.y;
+    thing->veloc_push_add.z.val += cvect.z;
+    thing->state_flags |= TF1_PushAdd;
+
+    return 0;
+}
+
 static int lua_delete_thing(lua_State *L)
 {
     struct Thing *thing = luaL_checkThing(L, 1);
@@ -71,13 +95,13 @@ static int lua_delete_thing(lua_State *L)
                 break;
         }
     }
-    if (thing->class_id == TCls_Creature)
+    if (thing_is_creature(thing))
     {
         kill_creature(thing, INVALID_THING, -1, CrDed_NoEffects | CrDed_NotReallyDying);
     }
     else
     {
-        delete_thing_structure(thing,0);
+        delete_thing_structure(thing, 0);
     }
     return 0;
 }
@@ -88,6 +112,16 @@ static int lua_is_valid(lua_State *L)
     return 1;
 }
 
+static int lua_destroy_object(lua_State* L)
+{
+    struct Thing* thing = luaL_checkObject(L, 1);
+    if (!thing_is_invalid(thing))
+    {
+        destroy_object(thing);
+        return 1;
+    } else
+    return 0;
+}
 
 static int lua_creature_walk_to(lua_State *L)
 {
@@ -97,14 +131,53 @@ static int lua_creature_walk_to(lua_State *L)
 
     CrtrStateId crstate = get_creature_state_besides_move(thing);
     lua_pushboolean(L, setup_person_move_to_position(thing, stl_x, stl_y, NavRtF_Default));
-    thing->continue_state = crstate;
+    if (crstate != 0)
+    {
+        thing->continue_state = crstate;
+    }
     return 1;
 }
 
 static int lua_kill_creature(lua_State *L)
 {
+    struct Thing* thing = luaL_checkCreature(L, 1);
+    struct Thing* killer = INVALID_THING;
+    PlayerNumber killing_player = -1;
+    if (!lua_isnone(L, 2))
+    {
+        killer = luaL_checkCreature(L, 2);
+        killing_player = killer->owner;
+    }
+    kill_creature(thing, killer, killing_player, CrDed_NoUnconscious);
+
+    return 0;
+}
+
+static int lua_transform_creature(lua_State* L)
+{
+    struct Thing* thing = luaL_checkCreature(L, 1);
+    ThingModel crtr_id = luaL_checkNamedCommand(L, 2, creature_desc);
+    int16_t crtr_level = luaL_checkinteger(L, 3);
+
+    if ((crtr_level < 0) || (crtr_level > CREATURE_MAX_LEVEL))
+    {
+        SCRPTERRLOG("Invalid CREATURE LEVEL parameter");
+        return 0;
+    }
+
+    grow_up_creature(thing, crtr_id, crtr_level);
+    return 0;
+}
+
+static int lua_stun_creature(lua_State* L)
+{
     struct Thing* thing = luaL_checkThing(L, 1);
-    kill_creature(thing, INVALID_THING, -1, CrDed_NoUnconscious);
+    make_creature_unconscious(thing);
+    if (!lua_isnone(L, 2))
+    {
+        struct CreatureControl* cctrl = creature_control_get_from_thing(thing);
+        cctrl->conscious_back_turns = luaL_checkinteger(L, 2);
+    }
 
     return 0;
 }
@@ -159,6 +232,29 @@ static int lua_Change_creature_owner(lua_State *L)
     return 0;
 }
 
+// creature:get_annoyance("NOT_PAID") → integer
+static int lua_get_creature_annoyance(lua_State *L)
+{
+    struct Thing *thing = luaL_checkCreature(L, 1);
+    long reason = luaL_checkNamedCommand(L, 2, anger_reason_desc);
+    if (reason < AngR_NotPaid || reason >= AngR_ListEnd)
+        return luaL_argerror(L, 2, "invalid anger reason");
+    struct CreatureControl *cctrl = creature_control_get_from_thing(thing);
+    lua_pushinteger(L, cctrl->annoyance_level[reason]);
+    return 1;
+}
+
+// creature:set_annoyance("NOT_PAID", 500)
+static int lua_set_creature_annoyance(lua_State *L)
+{
+    struct Thing *thing = luaL_checkCreature(L, 1);
+    long reason = luaL_checkNamedCommand(L, 2, anger_reason_desc);
+    if (reason < AngR_NotPaid || reason >= AngR_ListEnd)
+        return luaL_argerror(L, 2, "invalid anger reason");
+    long value = luaL_checkinteger(L, 3);
+    anger_set_creature_anger(thing, value, reason);
+    return 0;
+}
 
 
 static int thing_tostring(lua_State *L)
@@ -177,19 +273,44 @@ static int thing_set_field(lua_State *L) {
     const char* key = luaL_checkstring(L, 2);
 
     //Fields working for all thing classes
-    if (strcmp(key, "orientation") == 0) {
+    if (strcmp(key, "orientation") == 0)
+    {
         thing->move_angle_xy = luaL_checkinteger(L, 3);
-
+        // Re-sync first-person camera with creature orientation
+        struct PlayerInfo* player = get_my_player();
+        if (!player_invalid(player)
+            && player->controlled_thing_idx == thing->index
+            && player->view_mode == PVM_CreatureView)
+        {
+            set_local_camera_destination(player);
+        }        
+    } else if (strcmp(key, "pitch") == 0) 
+    {
+        thing->move_angle_z = luaL_checkinteger(L, 3);
     } else if (strcmp(key, "owner") == 0) {
         PlayerNumber new_owner = luaL_checkPlayerSingle(L, 3);
         if (is_thing_some_way_controlled(thing)) {
             prepare_to_controlled_creature_death(thing);
         }
         change_creature_owner(thing, new_owner);
-
     } else if (strcmp(key, "health") == 0)
     {
-        thing->health = luaL_checkinteger(L, 3);
+        HitPoints new_health = luaL_checkinteger(L, 3);
+        if (thing_is_creature(thing))
+        {
+            HitPoints old_health = thing->health;
+            if (new_health > old_health)
+            {
+                apply_health_to_thing_and_display_health(thing, new_health - old_health);
+            } else if (new_health < old_health) 
+            {
+                apply_damage_to_thing(thing, old_health - new_health, -1);
+            }
+        }
+        else
+        {
+            thing->health = new_health;    // Doors, Hearts, Traps, ...
+        }
     } else if (strcmp(key, "pos") == 0) 
     {
         struct Coord3d pos;
@@ -197,8 +318,7 @@ static int thing_set_field(lua_State *L) {
         move_thing_in_map(thing, &pos);
     } else if (strcmp(key, "anim_sprite") == 0)
     {
-        thing->anim_sprite = luaL_checkAnimationId(L, 3);
-        thing->max_frames = keepersprite_frames(thing->anim_sprite);
+        set_thing_animation(thing, luaL_checkAnimationId(L, 3), -1);
     } else if (strcmp(key, "anim_speed") == 0)
     {
         thing->anim_speed = luaL_checkinteger(L, 3);
@@ -311,6 +431,12 @@ static int thing_set_field(lua_State *L) {
         } else if (strcmp(key, "force_health_flower_hidden") == 0)
         {
             cctrl->force_health_flower_hidden = lua_toboolean(L, 3);
+        } else if (strcmp(key, "conscious_back_turns") == 0)
+        {
+            cctrl->conscious_back_turns = luaL_checkinteger(L, 3);
+        } else if (strcmp(key, "unsummon_duration") == 0)
+        {
+            cctrl->unsummon_turn = (get_gameturn() + luaL_checkinteger(L, 3));
         } else
         {
             return luaL_error(L, "Field '%s' is not writable on Creature thing", key);
@@ -364,6 +490,8 @@ static int thing_get_field(lua_State *L) {
         lua_pushPos(L, &thing->mappos);
     } else if (strcmp(key, "orientation") == 0) {
         lua_pushinteger(L, thing->move_angle_xy);
+    } else if (strcmp(key, "pitch") == 0) {
+        lua_pushinteger(L, thing->move_angle_z);
     } else if (strcmp(key, "health") == 0) {
         lua_pushinteger(L, thing->health);
     } else if (strcmp(key, "anim_sprite") == 0) {
@@ -390,6 +518,8 @@ static int thing_get_field(lua_State *L) {
         lua_pushinteger(L, get_thing_max_health(thing));
     } else if (strcmp(key, "picked_up") == 0) {
         lua_pushboolean(L, thing_is_picked_up(thing));
+    } else if (strcmp(key, "thing_class") == 0) {
+        lua_pushstring(L, thing_class_code_name(thing->class_id));
     } else if (try_get_from_methods(L, 1, key)) {
         return 1;
     }
@@ -439,6 +569,8 @@ static int thing_get_field(lua_State *L) {
             lua_pushinteger(L, cctrl->hand_blocked_turns);
         } else if (strcmp(key, "state") == 0) {
             lua_pushstring(L, get_conf_parameter_text(creatrstate_desc, thing->active_state));
+        } else if (strcmp(key, "state_besides_interruptions") == 0) {
+            lua_pushstring(L, get_conf_parameter_text(creatrstate_desc, get_creature_state_besides_interruptions(thing)));
         } else if (strcmp(key, "continue_state") == 0) {
             lua_pushstring(L, get_conf_parameter_text(creatrstate_desc, thing->continue_state));
         } else if (strcmp(key, "workroom") == 0) {
@@ -457,6 +589,12 @@ static int thing_get_field(lua_State *L) {
             lua_pushstring(L, get_conf_parameter_text(hero_objective_desc, cctrl->party.original_objective));
         } else if (strcmp(key, "party_target_player") == 0) {
             lua_pushPlayer(L, cctrl->party.target_plyr_idx);
+        } else if (strcmp(key, "conscious_back_turns") == 0) {
+            lua_pushinteger(L, cctrl->conscious_back_turns);
+        } else if (strcmp(key, "unsummon_duration") == 0) {
+            lua_pushinteger(L, (max((cctrl->unsummon_turn - get_gameturn()),0)));
+        } else if (strcmp(key, "familiars") == 0) {
+            lua_pushFamiliarTable(L, thing);
         } else {
             return luaL_error(L, "Unknown field or method '%s' for Creature thing", key);
         }
@@ -478,6 +616,16 @@ static int thing_get_field(lua_State *L) {
     }
 
     return 1;
+}
+
+static int lua_is_in_enemy_custody(lua_State *L) {
+    struct Thing* thing = luaL_checkThing(L, 1);
+    if (!thing_is_creature(thing)) {
+        lua_pushboolean(L, false);
+    } else {
+        lua_pushboolean(L, creature_is_kept_in_custody_by_enemy(thing));
+    }
+    return 1; 
 }
 
 static int thing_eq(lua_State *L) {
@@ -535,16 +683,22 @@ static int thing_eq(lua_State *L) {
 
 
 static const struct luaL_Reg thing_methods[] = {
-    {"make_thing_zombie", make_thing_zombie},
-    {"walk_to",  lua_creature_walk_to},
-    {"kill",    lua_kill_creature},
-    {"delete",     lua_delete_thing},
-    {"isValid",         lua_is_valid},
-    
-   {"transfer"                    ,lua_Transfer_creature               },
-   {"level_up"                    ,lua_Level_up_creature               },
-   {"teleport"                    ,lua_Teleport_creature               },
-   {"change_owner"                ,lua_Change_creature_owner           },
+    {"make_thing_zombie"            ,make_thing_zombie                  },
+    {"walk_to"                      ,lua_creature_walk_to               },
+    {"kill"                         ,lua_kill_creature                  },
+    {"stun"                         ,lua_stun_creature                  },
+    {"destroy"                      ,lua_destroy_object                 },
+    {"delete"                       ,lua_delete_thing                   },
+    {"transform"                    ,lua_transform_creature             },
+    {"isValid"                      ,lua_is_valid                       },
+    {"transfer"                     ,lua_Transfer_creature              },
+    {"level_up"                     ,lua_Level_up_creature              },
+    {"teleport"                     ,lua_Teleport_creature              },
+    {"change_owner"                 ,lua_Change_creature_owner          },
+    {"set_velocity"                 ,lua_set_velocity                   },
+    {"get_annoyance"                ,lua_get_creature_annoyance         },
+    {"set_annoyance"                ,lua_set_creature_annoyance         },
+    {"in_enemy_custody"             ,lua_is_in_enemy_custody            }, 
     {NULL, NULL}
 };
 

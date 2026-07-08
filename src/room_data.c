@@ -51,9 +51,11 @@
 #include "magic_powers.h"
 #include "room_util.h"
 #include "game_legacy.h"
+#include "config_sounds.h"
 #include "frontmenu_ingame_map.h"
 #include "keeperfx.hpp"
 #include "config_spritecolors.h"
+#include "lua_triggers.h"
 #include "post_inc.h"
 
 #ifdef __cplusplus
@@ -1033,7 +1035,7 @@ struct Room *allocate_free_room_structure(void)
             memset(room, 0, sizeof(struct Room));
             room->alloc_flags |= RoF_Allocated;
             room->index = i;
-            room->creation_turn = game.play_gameturn;
+            room->creation_turn = get_gameturn();
             return room;
         }
     }
@@ -2159,7 +2161,7 @@ TbBool creature_can_get_to_any_of_players_rooms(struct Thing *thing, PlayerNumbe
 {
     for (RoomKind rkind = 1; rkind < game.conf.slab_conf.room_types_count; rkind++)
     {
-        struct Room* room = find_room_of_kind_creature_can_navigate_to(thing, owner, rkind, NavRtF_NoOwner);
+        struct Room* room = find_room_of_kind_creature_can_navigate_to(thing, owner, rkind, NavRtF_Default);
         if (!room_is_invalid(room))
             return true;
     }
@@ -2936,9 +2938,8 @@ void kill_room_contents_at_subtile(struct Room *room, PlayerNumber plyr_idx, Map
         roomst = get_room_kind_stats(room->kind);
         if ((roomst->storage_height < 0) || (get_map_floor_filled_subtiles(mapblk) == roomst->storage_height))
         {
-            struct Thing *gldtng;
-            gldtng = find_gold_hoard_at(stl_x, stl_y);
-            if (!thing_is_invalid(gldtng))
+            struct Thing *gldtng = find_gold_hoard_at(stl_x, stl_y);
+            while (!thing_is_invalid(gldtng)) //Normally there is just a single hoard at a slab, but mapmakers may place more.
             {
                 room->capacity_used_for_storage -= gldtng->valuable.gold_stored;
                 dungeon = get_dungeon(plyr_idx);
@@ -2946,7 +2947,8 @@ void kill_room_contents_at_subtile(struct Room *room, PlayerNumber plyr_idx, Map
                     dungeon->total_money_owned -= gldtng->valuable.gold_stored;
                 }
                 drop_gold_pile(gldtng->valuable.gold_stored, &gldtng->mappos);
-                delete_thing_structure(gldtng, 0);
+                destroy_object(gldtng);
+                gldtng = find_gold_hoard_at(stl_x, stl_y);
             }
         }
     }
@@ -2999,7 +3001,7 @@ void kill_room_contents_at_subtile(struct Room *room, PlayerNumber plyr_idx, Map
                             }
                             remove_power_from_player(spl_idx, thing->owner);
                         }
-                        delete_thing_structure(thing, 0);
+                        destroy_thing(thing);
                     }
                 }
             }
@@ -3088,7 +3090,7 @@ void kill_room_contents_at_subtile(struct Room *room, PlayerNumber plyr_idx, Map
             if (thing_is_object(thing))
             {
                 if (object_is_infant_food(thing) || object_is_mature_food(thing) || object_is_growing_food(thing)) {
-                    delete_thing_structure(thing, 0);
+                    destroy_object(thing);
                 }
             }
             // Per thing code end
@@ -3268,7 +3270,7 @@ void replace_room_slab(struct Room *room, MapSlabCoord slb_x, MapSlabCoord slb_y
 
 struct Room *place_room(PlayerNumber owner, RoomKind rkind, MapSubtlCoord stl_x, MapSubtlCoord stl_y)
 {
-    game.map_changed_for_nagivation = 1;
+    game.map_changed_for_navigation = 1;
     if (subtile_coords_invalid(stl_x, stl_y))
         return INVALID_ROOM;
     long slb_x = subtile_slab(stl_x);
@@ -3294,9 +3296,9 @@ struct Room *place_room(PlayerNumber owner, RoomKind rkind, MapSubtlCoord stl_x,
     struct RoomConfigStats* roomst = get_room_kind_stats(room->kind);
     SlabCodedCoords i = get_slab_number(slb_x, slb_y);
     delete_room_slabbed_objects(i);
-    if ((rkind == RoK_GUARDPOST) || (rkind == RoK_BRIDGE)) //todo Make configurable
+    if (rkind == RoK_BRIDGE) //todo Make configurable
     {
-        place_animating_slab_type_on_map(roomst->assigned_slab, 0, stl_x, stl_y, owner);
+        place_animating_slab_type_on_map(roomst->assigned_slab, subtile_has_lava_on_top(stl_x, stl_y), stl_x, stl_y, owner);
     } else
     {
         place_slab_type_on_map(roomst->assigned_slab, stl_x, stl_y, owner, 0);
@@ -3549,7 +3551,7 @@ static void change_ownership_or_delete_object_thing_in_room(struct Room *room, s
         destroy_object(thing);
         return;
     }
-    if ((game.conf.rules[room->owner].game.classic_bugs_flags & ClscBug_ClaimRoomAllThings) != 0) {
+    if ((game.conf.rules[room->owner].gameplay.classic_bugs_flags & ClscBug_ClaimRoomAllThings) != 0) {
         // Preserve classic bug - object is claimed with the room
         thing->owner = newowner;
         return;
@@ -3833,12 +3835,13 @@ long claim_room(struct Room *room, struct Thing *claimtng)
     room->health = compute_room_max_health(room->slabs_count, room->efficiency);
     add_room_to_players_list(room, claimtng->owner);
     change_room_map_element_ownership(room, claimtng->owner);
+    lua_on_room_owner_change(room, oldowner);
     redraw_room_map_elements(room);
     do_room_unprettying(room, claimtng->owner);
     event_create_event(subtile_coord_center(room->central_stl_x), subtile_coord_center(room->central_stl_y),
         EvKind_RoomTakenOver, claimtng->owner, room->kind);
     do_room_integration(room);
-    thing_play_sample(claimtng, 116, NORMAL_PITCH, 0, 3, 0, 4, FULL_LOUDNESS);
+    thing_play_sample(claimtng, snd_room_claim, NORMAL_PITCH, 0, 3, 0, 4, FULL_LOUDNESS);
     output_room_takeover_message(room, oldowner, claimtng->owner);
     return 1;
 }
@@ -3864,6 +3867,7 @@ long claim_enemy_room(struct Room *room, struct Thing *claimtng)
     room->health = compute_room_max_health(room->slabs_count, room->efficiency);
     add_room_to_players_list(room, claimtng->owner);
     change_room_map_element_ownership(room, claimtng->owner);
+    lua_on_room_owner_change(room, oldowner);
     redraw_room_map_elements(room);
     do_room_unprettying(room, claimtng->owner);
     event_create_event(subtile_coord_center(room->central_stl_x), subtile_coord_center(room->central_stl_y),
@@ -3895,6 +3899,7 @@ long take_over_room(struct Room* room, PlayerNumber newowner)
         room->health = compute_room_max_health(room->slabs_count, room->efficiency);
         add_room_to_players_list(room, newowner);
         change_room_map_element_ownership(room, newowner);
+        lua_on_room_owner_change(room, oldowner);
         redraw_room_map_elements(room);
         do_room_unprettying(room, newowner);
         do_room_integration(room);

@@ -26,6 +26,7 @@
 #include "bflib_sprite.h"
 #include "bflib_sprfnt.h"
 #include "bflib_datetm.h"
+#include "bflib_inputctrl.h"
 #include "kjm_input.h"
 #include "gui_draw.h"
 #include "gui_frontmenu.h"
@@ -371,6 +372,8 @@ void kill_button_area_input(void)
   if (input_button != NULL)
     strcpy(input_button->content.str, backup_input_field);
   input_button = NULL;
+  if (LbIsTextInputActive())
+    LbStopTextInput();
 }
 
 void setup_radio_buttons(struct GuiMenu *gmnu)
@@ -980,7 +983,7 @@ void gui_area_flash_cycle_button(struct GuiButton *gbtn)
             ctptr = (unsigned char *)gbtn->content.ptr;
             if ((ctptr != NULL) && (*ctptr > 0))
             {
-                if ((game.play_gameturn % (2 * gui_blink_rate)) >= gui_blink_rate) {
+                if ((get_gameturn() % (2 * gui_blink_rate)) >= gui_blink_rate) {
                     spr_idx += 2;
                 }
             }

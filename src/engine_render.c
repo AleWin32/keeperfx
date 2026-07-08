@@ -56,6 +56,7 @@
 #include "keeperfx.hpp"
 #include "kjm_input.h"
 #include "player_instances.h"
+#include "roomspace_prediction.h"
 #include "sprites.h"
 #include "thing_stats.h"
 #include "thing_traps.h"
@@ -487,6 +488,12 @@ static void (*render_sprite_debug_fn) (struct Thing*, long scrpos_x, long scrpos
 static int render_sprite_debug_level = 0;
 static void draw_keepsprite_unscaled_in_buffer(unsigned short kspr_n, short angle, unsigned char current_frame, unsigned char *outbuf);
 static void draw_jonty_mapwho(struct BucketKindJontySprite *jspr);
+
+static TbBool animation_sprite_id_invalid(unsigned short animation_sprite)
+{
+    return ((animation_sprite >= total_keepersprite_animations) && (animation_sprite < KEEPERSPRITE_ADD_OFFSET))
+        || (animation_sprite >= KEEPERSPRITE_ADD_OFFSET + KEEPERSPRITE_ADD_NUM);
+}
 /******************************************************************************/
 
 static void calculate_hud_scale(struct Camera *cam) {
@@ -517,63 +524,65 @@ static void calculate_hud_scale(struct Camera *cam) {
     hud_scale = ((range_input - range_min)) / (range_max - range_min);
 }
 
-float interpolate(float variable_to_interpolate, long previous, long current)
+extern float interpolate_time;  // main.cpp
+
+float interpolate(float previous, float current)
 {
-    if (is_feature_on(Ft_DeltaTime) == false || game.frame_skip > 0) {
+    if (! is_feature_on(Ft_DeltaTime))
         return current;
-    }
-    // future: by using the predicted future position in the interpolation calculation, we can remove input lag (or visual lag).
-    long future = current + (current - previous);
-    // 0.5 is definitely accurate. Tested by rotating the camera while comparing the minimap's rotation with the camera's rotation in a video recording.
-    float desired_value = LbLerp(current, future, 0.5);
-    return LbLerp(variable_to_interpolate, desired_value, game.delta_time);
+
+    return LbLerp(previous, current, interpolate_time);
 }
 
-float interpolate_angle(float variable_to_interpolate, float previous, float current)
+float interpolate_angle(float previous, float current)
 {
-    if (is_feature_on(Ft_DeltaTime) == false || game.frame_skip > 0) {
+    if (! is_feature_on(Ft_DeltaTime))
         return current;
-    }
-    float future = current + (current - previous);
-    float desired_value = lerp_angle(current, future, 0.5);
-    float result = lerp_angle(variable_to_interpolate, desired_value, game.delta_time);
-    float result_change = LbFmodf((result - current) + DEGREES_180, DEGREES_360) - DEGREES_180;
-    if (result_change > -0.5f && result_change < 0.5f) {
+
+    return lerp_angle(previous, current, interpolate_time);
+}
+
+// For things that stop moving when the game is paused.
+float interpolate_synced(float previous, float current)
+{
+    if (flag_is_set(game.operation_flags, GOF_Paused))
         return current;
+
+    return interpolate(previous, current);
+}
+
+struct ThingInterpolateResult interpolate_thing(struct Thing *thing)
+{
+    struct ThingInterpolateResult result;
+
+    if (get_gameturn() - thing->creation_turn <= 1)
+    {
+        // Set initial interp position when Thing has just been created
+        thing->previous_mappos = thing->mappos;
+        thing->previous_floor_height = thing->floor_height;
     }
+
+    // Interpolate position every frame
+    result.mappos.x.val = interpolate_synced(thing->previous_mappos.x.val, thing->mappos.x.val);
+    result.mappos.y.val = interpolate_synced(thing->previous_mappos.y.val, thing->mappos.y.val);
+    result.mappos.z.val = interpolate_synced(thing->previous_mappos.z.val, thing->mappos.z.val);
+    result.floor_height = interpolate_synced(thing->previous_floor_height, thing->floor_height);
+
+    // Cancel interpolation if distance to interpolate is too far. This is a
+    // catch-all to solve any remaining interpolation bugs.
+    if ((abs(thing->previous_mappos.x.val - thing->mappos.x.val) >= 10000) ||
+        (abs(thing->previous_mappos.y.val - thing->mappos.y.val) >= 10000) ||
+        (abs(thing->previous_mappos.z.val - thing->mappos.z.val) >= 10000))
+    {
+        ERRORLOG("The %s index %d owned by player %d moved an unrealistic distance((%d,%d,%d) to (%d,%d,%d)), refusing interpolation.",
+                 thing_model_name(thing), (int)thing->index, (int)thing->owner,
+                 thing->previous_mappos.x.stl.num, thing->previous_mappos.y.stl.num, thing->previous_mappos.z.stl.num,
+                 thing->mappos.x.stl.num, thing->mappos.y.stl.num, thing->mappos.z.stl.num);
+        result.mappos = thing->mappos;
+        result.floor_height = thing->floor_height;
+    }
+
     return result;
-}
-
-void interpolate_thing(struct Thing *thing)
-{
-    // Note: if delta_time is off the interpolated position will also reflect that
-
-    if (thing->creation_turn == game.play_gameturn-1 || game.play_gameturn - thing->last_turn_drawn > 1 ) {
-        // Set initial interp position when either Thing has just been created or goes off camera then comes back on camera
-        thing->interp_mappos = thing->mappos;
-        thing->interp_floor_height = thing->floor_height;
-
-        if (thing->interp_mappos.z.val == 65534) { // Fixes an odd bug where thing->mappos.z.val is briefly 65534 (for 1 turn) in certain situations, which can mess up the interpolation and cause things to fall from the sky.
-            thing->interp_mappos.z.val = thing->interp_floor_height;
-        }
-    } else {
-        // Interpolate position every frame
-        thing->interp_mappos.x.val = interpolate(thing->interp_mappos.x.val, thing->previous_mappos.x.val, thing->mappos.x.val);
-        thing->interp_mappos.z.val = interpolate(thing->interp_mappos.z.val, thing->previous_mappos.z.val, thing->mappos.z.val);
-        thing->interp_mappos.y.val = interpolate(thing->interp_mappos.y.val, thing->previous_mappos.y.val, thing->mappos.y.val);
-        thing->interp_floor_height = interpolate(thing->interp_floor_height, thing->previous_floor_height, thing->floor_height);
-
-        // Cancel interpolation if distance to interpolate is too far. This is a catch-all to solve any remaining interpolation bugs.
-        if ((abs(thing->interp_mappos.x.val-thing->mappos.x.val) >= 10000) ||
-            (abs(thing->interp_mappos.y.val-thing->mappos.y.val) >= 10000) ||
-            (abs(thing->interp_mappos.z.val-thing->mappos.z.val) >= 10000))
-        {
-            ERRORLOG("The %s index %d owned by player %d moved an unrealistic distance((%d,%d,%d) to (%d,%d,%d)), refusing interpolation."
-                ,thing_model_name(thing), (int)thing->index, (int)thing->owner, thing->interp_mappos.x.stl.num, thing->interp_mappos.y.stl.num, thing->interp_mappos.z.stl.num, thing->mappos.x.stl.num, thing->mappos.y.stl.num, thing->mappos.z.stl.num);
-            thing->interp_mappos = thing->mappos;
-            thing->interp_floor_height = thing->floor_height;
-        }
-    }
 }
 
 static void get_floor_pointed_at(long x, long y, int32_t *floor_x, int32_t *floor_y)
@@ -2814,15 +2823,16 @@ static void process_isometric_map_volume_box(long x, long y, long z, PlayerNumbe
     unsigned char default_color = map_volume_box.color;
     unsigned char line_color = default_color;
     struct PlayerInfo* current_player = get_player(plyr_idx);
+    struct RoomSpace *render_roomspace = get_local_dig_prediction_render_roomspace(&current_player->render_roomspace);
     // Check if a roomspace is currently being built
     // and if so feed this back to the user
     if ((current_player->roomspace.is_active) && ((current_player->work_state == PSt_Sell) || (current_player->work_state == PSt_BuildRoom)))
     {
         line_color = SLC_REDYELLOW; // change the cursor color to indicate to the user that nothing else can be built or sold at the moment
     }
-    if (current_player->render_roomspace.render_roomspace_as_box)
+    if (render_roomspace->render_roomspace_as_box)
     {
-        if (current_player->render_roomspace.is_roomspace_a_box)
+        if (render_roomspace->is_roomspace_a_box)
         {
             // This is a basic square box
             create_map_volume_box(x + box_lag_compensation_x, y + box_lag_compensation_y, z, line_color);
@@ -2832,13 +2842,13 @@ static void process_isometric_map_volume_box(long x, long y, long z, PlayerNumbe
             // This is a "2-line" square box
             // i.e. an "accurate" box with an outer square box
             map_volume_box.color = line_color;
-            create_fancy_map_volume_box(current_player->render_roomspace, x + box_lag_compensation_x, y + box_lag_compensation_y, z, (current_player->render_roomspace.slab_count == 0) ? SLC_RED : SLC_BROWN, true);
+            create_fancy_map_volume_box(*render_roomspace, x + box_lag_compensation_x, y + box_lag_compensation_y, z, (render_roomspace->slab_count == 0) ? SLC_RED : SLC_BROWN, true);
         }
     }
     else
     {
         // This is an "accurate"/"automagic" box
-        create_fancy_map_volume_box(current_player->render_roomspace, x + box_lag_compensation_x, y + box_lag_compensation_y, z, line_color, false);
+        create_fancy_map_volume_box(*render_roomspace, x + box_lag_compensation_x, y + box_lag_compensation_y, z, line_color, false);
     }
     map_volume_box.color = default_color;
 }
@@ -3864,6 +3874,8 @@ static long find_fade_S(struct EngineCoord *ecor)
 
 static void create_shadows(struct Thing *thing, struct EngineCoord *ecor, struct Coord3d *pos)
 {
+    unsigned short animation_sprite;
+    unsigned char current_frame;
     short mv_angle;
     short sh_angle;
     short sprite_angle;
@@ -3873,7 +3885,12 @@ static void create_shadows(struct Thing *thing, struct EngineCoord *ecor, struct
     struct EngineCoord ecor3;
     struct EngineCoord ecor4;
 
-    struct KeeperSprite *spr = keepersprite_array(thing->anim_sprite);
+    animation_sprite = get_render_animation_sprite(thing->anim_sprite);
+    current_frame = thing->current_frame;
+    struct KeeperSprite *spr = keepersprite_array(animation_sprite);
+    if (spr == NULL) {
+        return;
+    }
 
     mv_angle = thing->move_angle_xy;
     sh_angle = get_angle_xy_to(pos, &thing->mappos);
@@ -3889,7 +3906,13 @@ static void create_shadows(struct Thing *thing, struct EngineCoord *ecor, struct
     short dim_oh;
     short dim_th;
     short dim_tw;
-    get_keepsprite_unscaled_dimensions(thing->anim_sprite, sprite_angle, thing->current_frame, &dim_ow, &dim_oh, &dim_tw, &dim_th);
+    get_keepsprite_unscaled_dimensions(animation_sprite, sprite_angle, current_frame, &dim_ow, &dim_oh, &dim_tw, &dim_th);
+    if (dim_ow <= 0 || dim_oh <= 0 || dim_ow > 256 || dim_oh > 256)
+    {
+        WARNLOG("[md10 crash investigation] Invalid shadow dimensions dim_ow=%d dim_oh=%d for thing %d (anim=%d frame=%d)",
+                dim_ow, dim_oh, thing->index, animation_sprite, current_frame);
+        return;
+    }
     {
         int sh_angle_sin = LbSinL(sh_angle);
         int sh_angle_cos = LbCosL(sh_angle);
@@ -3976,8 +3999,8 @@ static void create_shadows(struct Thing *thing, struct EngineCoord *ecor, struct
     // overall
     kspr->vertex_first.S = dist_sq;
     kspr->angle = sprite_angle;
-    kspr->anim_sprite = thing->anim_sprite;
-    kspr->current_frame = thing->current_frame;
+    kspr->anim_sprite = animation_sprite;
+    kspr->current_frame = current_frame;
 }
 
 // Creature status flower above head in isometric view
@@ -4420,6 +4443,7 @@ static void do_a_plane_of_engine_columns_cluedo(long stl_x, long stl_y, long pla
     {
         struct Map *cur_mapblk;
         cur_mapblk = get_map_block_at(stl_x + xaval + xidx, stl_y);
+        unsigned char render_map_flags = get_local_dig_prediction_render_flags(stl_x + xaval + xidx, stl_y, cur_mapblk->flags);
         // Get solidmasks of sibling columns
         unsigned short solidmsk_cur_raw;
         unsigned short solidmsk_cur;
@@ -4549,13 +4573,13 @@ static void do_a_plane_of_engine_columns_cluedo(long stl_x, long stl_y, long pla
         {
             int ncor_raw;
             ncor_raw = floor_height_table[solidmsk_cur_raw];
-            if ( (cur_mapblk->flags & SlbAtFlg_Unexplored) != 0 )
+            if ( (render_map_flags & SlbAtFlg_Unexplored) != 0 )
             {
                 unsigned short textr_id = engine_remap_texture_blocks(stl_x + xaval + xidx, stl_y, TEXTURE_LAND_MARKED_LAND);
                 do_a_gpoly_unlit_tr(&bec[0].cors[ncor], &bec[1].cors[ncor], &fec[1].cors[ncor], textr_id);
                 do_a_gpoly_unlit_bl(&fec[1].cors[ncor], &fec[0].cors[ncor], &bec[0].cors[ncor], textr_id);
             } else
-            if ((cur_mapblk->flags & SlbAtFlg_TaggedValuable) != 0)
+            if ((render_map_flags & SlbAtFlg_TaggedValuable) != 0)
             {
                 unsigned short textr_id = engine_remap_texture_blocks(stl_x + xaval + xidx, stl_y, TEXTURE_LAND_MARKED_GOLD);
                 do_a_gpoly_unlit_tr(&bec[0].cors[ncor], &bec[1].cors[ncor], &fec[1].cors[ncor], textr_id);
@@ -4573,7 +4597,7 @@ static void do_a_plane_of_engine_columns_cluedo(long stl_x, long stl_y, long pla
             }
         } else
         {
-            if ((cur_mapblk->flags & SlbAtFlg_Unexplored) == 0)
+            if ((render_map_flags & SlbAtFlg_Unexplored) == 0)
             {
                 unsigned short textr_id = engine_remap_texture_blocks(stl_x + xaval + xidx, stl_y, cur_colmn->floor_texture);
                 do_a_gpoly_gourad_tr(&bec[0].cors[0], &bec[1].cors[0], &fec[1].cors[0], textr_id, -1);
@@ -4628,6 +4652,7 @@ static void do_a_plane_of_engine_columns_isometric(long stl_x, long stl_y, long 
     {
         struct Map *cur_mapblk;
         cur_mapblk = get_map_block_at(stl_x + xaval + xidx, stl_y);
+        unsigned char render_map_flags = get_local_dig_prediction_render_flags(stl_x + xaval + xidx, stl_y, cur_mapblk->flags);
         // Get column to be drawn
         const struct Column *cur_colmn;
         cur_colmn = unrev_colmn;
@@ -4736,13 +4761,13 @@ static void do_a_plane_of_engine_columns_isometric(long stl_x, long stl_y, long 
         ncor = floor_height_table[solidmsk_cur];
         if (ncor > 0)
         {
-            if (cur_mapblk->flags & SlbAtFlg_Unexplored)
+            if (render_map_flags & SlbAtFlg_Unexplored)
             {
                 unsigned short textr_id = engine_remap_texture_blocks(stl_x + xaval + xidx, stl_y, TEXTURE_LAND_MARKED_LAND);
                 do_a_gpoly_unlit_tr(&bec[0].cors[ncor], &bec[1].cors[ncor], &fec[1].cors[ncor], textr_id);
                 do_a_gpoly_unlit_bl(&fec[1].cors[ncor], &fec[0].cors[ncor], &bec[0].cors[ncor], textr_id);
             }
-            else if ((cur_mapblk->flags & (SlbAtFlg_TaggedValuable|SlbAtFlg_Unexplored)) == 0)
+            else if ((render_map_flags & (SlbAtFlg_TaggedValuable|SlbAtFlg_Unexplored)) == 0)
             {
                 struct CubeConfigStats * cubed;
                 cubed = get_cube_model_stats(*(short *)((char *)&cur_colmn->floor_texture + 2 * ncor + 1));
@@ -4751,7 +4776,7 @@ static void do_a_plane_of_engine_columns_isometric(long stl_x, long stl_y, long 
                 do_a_gpoly_gourad_tr(&bec[0].cors[ncor], &bec[1].cors[ncor], &fec[1].cors[ncor], textr_id, -1);
                 do_a_gpoly_gourad_bl(&fec[1].cors[ncor], &fec[0].cors[ncor], &bec[0].cors[ncor], textr_id, -1);
             } else
-            if ((cur_mapblk->flags & SlbAtFlg_Valuable) != 0)
+            if ((render_map_flags & SlbAtFlg_Valuable) != 0)
             {
                 unsigned short textr_id = engine_remap_texture_blocks(stl_x + xaval + xidx, stl_y, TEXTURE_LAND_MARKED_GOLD);
                 do_a_gpoly_unlit_tr(&bec[0].cors[ncor], &bec[1].cors[ncor], &fec[1].cors[ncor], textr_id);
@@ -4759,7 +4784,7 @@ static void do_a_plane_of_engine_columns_isometric(long stl_x, long stl_y, long 
             }
         } else
         {
-            if ((cur_mapblk->flags & SlbAtFlg_Unexplored) == 0)
+            if ((render_map_flags & SlbAtFlg_Unexplored) == 0)
             {
                 unsigned short textr_id = engine_remap_texture_blocks(stl_x + xaval + xidx, stl_y, cur_colmn->floor_texture);
                 do_a_gpoly_gourad_tr(&bec[0].cors[0], &bec[1].cors[0], &fec[1].cors[0], textr_id, -1);
@@ -4808,6 +4833,8 @@ static void process_keeper_flame_on_sprite(struct BucketKindJontySprite* jspr, l
     struct ObjectConfigStats* objst;
     struct TrapConfigStats* trapst;
     struct FlameProperties flame;
+    unsigned short animation_sprite;
+    unsigned char current_frame;
     unsigned long nframe;
     long add_x, add_y;
     long scale = 0;
@@ -4851,7 +4878,9 @@ static void process_keeper_flame_on_sprite(struct BucketKindJontySprite* jspr, l
         lbDisplay.DrawFlags |= Lb_SPRITE_TRANSPAR4;
     if (flag_is_set(thing->rendering_flags, TRF_Transpar_Alpha))
         EngineSpriteDrawUsingAlpha = 1;
-    process_keeper_sprite(jspr->scr_x, jspr->scr_y, thing->anim_sprite, angle, thing->current_frame, base_sprite_size);
+    animation_sprite = get_render_animation_sprite(thing->anim_sprite);
+    current_frame = thing->current_frame;
+    process_keeper_sprite(jspr->scr_x, jspr->scr_y, animation_sprite, angle, current_frame, base_sprite_size);
 
     //Flame
     lbDisplay.DrawFlags = 0;
@@ -4868,8 +4897,12 @@ static void process_keeper_flame_on_sprite(struct BucketKindJontySprite* jspr, l
     {
         EngineSpriteDrawUsingAlpha = 1;
     }
-    nframe = (thing->index + game.play_gameturn * flame.anim_speed / 256) % keepersprite_frames(flame.animation_id);
-    process_keeper_sprite(jspr->scr_x + add_x, jspr->scr_y + add_y, flame.animation_id, angle, nframe, scale);
+    unsigned short flame_sprite = get_render_animation_sprite(flame.animation_id);
+    unsigned char flame_frames = keepersprite_frames(flame_sprite);
+    if (flame_frames > 0) {
+        nframe = (thing->index + get_gameturn() * flame.anim_speed / 256) % flame_frames;
+        process_keeper_sprite(jspr->scr_x + add_x, jspr->scr_y + add_y, flame_sprite, angle, nframe, scale);
+    }
 }
 
 static unsigned short get_thing_shade(struct Thing* thing);
@@ -4880,10 +4913,14 @@ static void draw_fastview_mapwho(struct Camera *cam, struct BucketKindJontySprit
     struct PlayerInfo *player = get_my_player();
     struct ObjectConfigStats* objst;
     struct Thing *thing = jspr->thing;
+    unsigned short animation_sprite;
+    unsigned char current_frame;
     short angle;
     flg_mem = lbDisplay.DrawFlags;
     alpha_mem = EngineSpriteDrawUsingAlpha;
-    if (keepersprite_rotable(thing->anim_sprite))
+    animation_sprite = get_render_animation_sprite(thing->anim_sprite);
+    current_frame = thing->current_frame;
+    if (keepersprite_rotable(animation_sprite))
     {
         angle = thing->move_angle_xy - cam->rotation_angle_x; // rotation_angle_x maybe short
     }
@@ -4945,8 +4982,7 @@ static void draw_fastview_mapwho(struct Camera *cam, struct BucketKindJontySprit
         || (thing->class_id == TCls_DeadCreature)
         || (player->work_state == PSt_QueryAll))
     {
-        if ((player->thing_under_hand == thing->index) && ((game.play_gameturn % (4 * gui_blink_rate)) >= 2 * gui_blink_rate))
-        {
+        if ((local_thing_under_hand == thing->index) && ((get_gameturn() % (4 * gui_blink_rate)) >= 2 * gui_blink_rate)) {
             lbDisplay.DrawFlags |= Lb_TEXT_UNDERLNSHADOW;
             lbSpriteReMapPtr = white_pal;
         } else {
@@ -4954,12 +4990,6 @@ static void draw_fastview_mapwho(struct Camera *cam, struct BucketKindJontySprit
             {
                 lbDisplay.DrawFlags |= Lb_TEXT_UNDERLNSHADOW;
                 lbSpriteReMapPtr = red_pal;
-                thing->time_spent_displaying_hurt_colour += game.delta_time;
-                if (thing->time_spent_displaying_hurt_colour >= 1.0 || game.frame_skip > 0)
-                {
-                    thing->time_spent_displaying_hurt_colour = 0;
-                    thing->rendering_flags &= ~TRF_BeingHit; // Turns off red damage colour tint
-                }
             }
         }
         thing_being_displayed_is_creature = 1;
@@ -4970,12 +5000,9 @@ static void draw_fastview_mapwho(struct Camera *cam, struct BucketKindJontySprit
         thing_being_displayed = NULL;
     }
 
-    if (
-            ((thing->anim_sprite >= total_keepersprite_animations) && (thing->anim_sprite < KEEPERSPRITE_ADD_OFFSET))
-            || (thing->anim_sprite >= KEEPERSPRITE_ADD_OFFSET + KEEPERSPRITE_ADD_NUM)
-            )
+    if (animation_sprite_id_invalid(animation_sprite))
     {
-        ERRORLOG("Invalid graphic Id %d from model %d, class %d", (int)thing->anim_sprite, (int)thing->model, (int)thing->class_id);
+        ERRORLOG("Invalid graphic Id %d from model %d, class %d", (int)animation_sprite, (int)thing->model, (int)thing->class_id);
         lbDisplay.DrawFlags = flg_mem;
         EngineSpriteDrawUsingAlpha = alpha_mem;
         return;
@@ -5015,7 +5042,7 @@ static void draw_fastview_mapwho(struct Camera *cam, struct BucketKindJontySprit
     {
         if (is_shown || get_my_player()->id_number == thing->owner || thing->trap.revealed)
         {
-            process_keeper_sprite(jspr->scr_x, jspr->scr_y, thing->anim_sprite, angle, thing->current_frame, size_on_screen);
+            process_keeper_sprite(jspr->scr_x, jspr->scr_y, animation_sprite, angle, current_frame, size_on_screen);
         }
     }
     lbDisplay.DrawFlags = flg_mem;
@@ -5042,10 +5069,12 @@ static void draw_engine_number(struct BucketKindFloatingGoldText *num)
     spr = get_button_sprite(GBS_fontchars_number_dig0);
     w = scale_ui_value(spr->SWidth) * scale_by_zoom;
     h = scale_ui_value(spr->SHeight) * scale_by_zoom;
+    struct Camera *active_cam = get_player_active_camera(player);
     if (
-        player->acamera->view_mode == PVM_IsoWibbleView ||
-        player->acamera->view_mode == PVM_FrontView ||
-        player->acamera->view_mode == PVM_IsoStraightView
+        active_cam != NULL &&
+        (active_cam->view_mode == PVM_IsoWibbleView ||
+         active_cam->view_mode == PVM_FrontView ||
+         active_cam->view_mode == PVM_IsoStraightView)
     ) {
         // Count digits to be displayed
         ndigits=0;
@@ -5076,7 +5105,7 @@ static void draw_engine_room_flagpole(struct BucketKindRoomFlag *rflg)
         return;
     }
     struct PlayerInfo *player = get_my_player();
-    const struct Camera *cam = get_local_camera(player->acamera);
+    const struct Camera *cam = get_local_camera(get_player_active_camera(player));
 
     if (
         cam->view_mode == PVM_IsoWibbleView ||
@@ -5146,17 +5175,17 @@ void fill_status_sprite_indexes(struct Thing *thing, struct CreatureControl *cct
     if (is_my_player_number(thing->owner))
     {
         lbDisplay.DrawFlags |= Lb_SPRITE_TRANSPAR4;
-        if (game.play_gameturn - cctrl->thought_bubble_last_turn_drawn == 1)
+        if (get_gameturn() - cctrl->thought_bubble_last_turn_drawn == 1)
         {
             if (cctrl->thought_bubble_display_timer < 40) {
                 cctrl->thought_bubble_display_timer++;
             }
         } else {
-            if (game.play_gameturn - cctrl->thought_bubble_last_turn_drawn > 1) {
+            if (get_gameturn() - cctrl->thought_bubble_last_turn_drawn > 1) {
                 cctrl->thought_bubble_display_timer = 0;
             }
         }
-        cctrl->thought_bubble_last_turn_drawn = game.play_gameturn;
+        cctrl->thought_bubble_last_turn_drawn = get_gameturn();
         if (cctrl->thought_bubble_display_timer >= 40)
         {
             struct CreatureStateConfig *stati;
@@ -5235,7 +5264,7 @@ void fill_status_sprite_indexes(struct Thing *thing, struct CreatureControl *cct
 void draw_status_sprites(long scrpos_x, long scrpos_y, struct Thing *thing)
 {
     struct PlayerInfo *player = get_my_player();
-    const struct Camera *cam = get_local_camera(player->acamera);
+    const struct Camera *cam = get_local_camera(get_player_active_camera(player));
     if (cam == NULL)
     {
         return;
@@ -5267,13 +5296,14 @@ void draw_status_sprites(long scrpos_x, long scrpos_y, struct Thing *thing)
 
     struct CreatureControl *cctrl;
     cctrl = creature_control_get_from_thing(thing);
-    if (cctrl->force_health_flower_hidden == true)
+    if ((cctrl->force_health_flower_hidden == true) || flag_is_set(get_creature_model_flags(thing), CMF_NoHealthFlower)) {
+        lbDisplay.DrawFlags = flg_mem;
         return;
+    }
     if (flag_is_set(game.mode_flags,MFlg_NoHeroHealthFlower))
     {
-        if (player->thing_under_hand != thing->index)
-        {
-            cctrl->thought_bubble_last_turn_drawn = game.play_gameturn;
+        if (local_thing_under_hand != thing->index) {
+            cctrl->thought_bubble_last_turn_drawn = get_gameturn();
             if (cctrl->force_health_flower_displayed == false)
             {
                 return;
@@ -5321,7 +5351,7 @@ void draw_status_sprites(long scrpos_x, long scrpos_y, struct Thing *thing)
 
     lbDisplay.DrawFlags &= ~Lb_SPRITE_TRANSPAR8;
     lbDisplay.DrawFlags &= ~Lb_SPRITE_TRANSPAR4;
-    if (((game.play_gameturn % (8 * gui_blink_rate)) < 4 * gui_blink_rate) && (anger_spridx > 0))
+    if (((get_gameturn() % (8 * gui_blink_rate)) < 4 * gui_blink_rate) && (anger_spridx > 0))
     {
         spr = get_button_sprite(anger_spridx);
         w = (base_size * spr->SWidth * bs_units_per_px / 16) >> 13;
@@ -5339,12 +5369,12 @@ void draw_status_sprites(long scrpos_x, long scrpos_y, struct Thing *thing)
         h_add += h;
     }
 
-    if ((thing->lair.spr_size > 0) && (health_spridx > 0) && ((game.play_gameturn % (2 * gui_blink_rate)) >= gui_blink_rate))
+    if ((thing->lair.spr_size > 0) && (health_spridx > 0) && ((get_gameturn() % (2 * gui_blink_rate)) >= gui_blink_rate))
     {
         int flash_color = get_player_color_idx(thing->owner);
         if (flash_color == PLAYER_NEUTRAL)
         {
-            flash_color = (game.play_gameturn % (4 * neutral_flash_rate)) / neutral_flash_rate;
+            flash_color = (get_gameturn() % (4 * neutral_flash_rate)) / neutral_flash_rate;
         }
         spr = get_button_sprite_for_player(health_spridx, thing->owner);
         w = (base_size * spr->SWidth * bs_units_per_px / 16) >> 13;
@@ -5354,7 +5384,7 @@ void draw_status_sprites(long scrpos_x, long scrpos_y, struct Thing *thing)
     else
     {
         // Determine if the creature is under the player's hand (being hovered over).
-        TbBool is_thing_under_hand = (player->thing_under_hand == thing->index);
+        TbBool is_thing_under_hand = (local_thing_under_hand == thing->index);
         // Check if the creature is an enemy and is visible.
         TbBool is_enemy_and_visible = players_are_enemies(player->id_number, thing->owner) && !creature_is_invisible(thing);
         // Check if the creature belongs to the player, is hurt but not unconscious.
@@ -5428,7 +5458,7 @@ static void draw_room_flag_top(long x, long y, int units_per_px, const struct Ro
     ps_units_per_px = 36*units_per_px/spr->SHeight;
     LbSpriteDrawScaled(x, y, spr, spr->SWidth * ps_units_per_px / 16, spr->SHeight * ps_units_per_px / 16);
     struct RoomConfigStats *roomst;
-    roomst = &game.conf.slab_conf.room_cfgstats[room->kind];
+    roomst = get_room_kind_stats(room->kind);
     int barpos_x;
     barpos_x = x + spr->SWidth * ps_units_per_px / 16 - (8 * units_per_px - 8) / 16;
     spr = get_panel_sprite(roomst->medsym_sprite_idx);
@@ -5474,7 +5504,7 @@ static void draw_engine_room_flag_top(struct BucketKindRoomFlag *rflg)
         return;
     }
     struct PlayerInfo *player = get_my_player();
-    const struct Camera *cam = get_local_camera(player->acamera);
+    const struct Camera *cam = get_local_camera(get_player_active_camera(player));
 
     if (
         cam->view_mode == PVM_IsoWibbleView ||
@@ -5503,8 +5533,8 @@ static void draw_stripey_line(long x1,long y1,long x2,long y2,unsigned char line
 {
     if ((x1 == x2) && (y1 == y2)) return; // todo if distance is 0, provide a red square
 
-    // get the 4 least significant bits of game.play_gameturn, to loop through the starting index of the color array, using numbers 0-15.
-    unsigned char color_index = game.play_gameturn & 0xf;
+    // get the 4 least significant bits of get_gameturn(), to loop through the starting index of the color array, using numbers 0-15.
+    unsigned char color_index = get_gameturn() & 0xf;
 
     // get engine window width and height
     struct PlayerInfo *player = get_my_player();
@@ -6698,7 +6728,7 @@ static void display_drawlist(void) // Draws isometric and 1st person view. Not f
                 break;
             case QK_JontyISOSprite: // Spinning key
                 player = get_my_player();
-                cam = get_local_camera(player->acamera);
+                cam = get_local_camera(get_player_active_camera(player));
                 if (cam != NULL)
                 {
                     if (cam->view_mode == PVM_IsoWibbleView || cam->view_mode == PVM_IsoStraightView) {
@@ -7476,7 +7506,7 @@ static unsigned short get_thing_shade(struct Thing* thing)
 {
     MapSubtlCoord stl_x;
     MapSubtlCoord stl_y;
-    long minimum_lightness = game.conf.rules[thing->owner].game.thing_minimum_illumination << 8;
+    long minimum_lightness = game.conf.rules[thing->owner].gameplay.thing_minimum_illumination << 8;
     long lgh[2][2]; // the dimensions are lgh[y][x]
     long shval;
     long fract_x;
@@ -7675,6 +7705,15 @@ void process_keeper_sprite(short x, short y, unsigned short kspr_base, short ksp
     SYNCDBG(17, "At (%d,%d) opts %d %d %d %d", (int)x, (int)y, (int)kspr_base, (int)kspr_angle, (int)sprgroup, (int)scale);
     player = get_my_player();
     creature_sprites = keepersprite_array(kspr_base);
+    if (creature_sprites == NULL) {
+        return;
+    }
+    if (creature_sprites->FramesCount == 0) {
+        return;
+    }
+    if (sprgroup >= creature_sprites->FramesCount) {
+        sprgroup = creature_sprites->FramesCount - 1;
+    }
 
     if (((kspr_angle & ANGLE_MASK) <= 1151) || ((kspr_angle & ANGLE_MASK) >= 1919) || (creature_sprites->Rotable != 2) )
         needs_xflip = 0;
@@ -7718,7 +7757,7 @@ void process_keeper_sprite(short x, short y, unsigned short kspr_base, short ksp
         }
         if ( (thing_being_displayed->movement_flags & TMvF_BeingSacrificed) != 0 )
         {
-            get_keepsprite_unscaled_dimensions(thing_being_displayed->anim_sprite, thing_being_displayed->move_angle_xy, thing_being_displayed->current_frame, &dim_ow, &dim_oh, &dim_tw, &dim_th);
+            get_keepsprite_unscaled_dimensions(kspr_base, thing_being_displayed->move_angle_xy, sprgroup, &dim_ow, &dim_oh, &dim_tw, &dim_th);
             cctrl = creature_control_get_from_thing(thing_being_displayed);
             lltemp = dim_oh * (48 - (long)cctrl->sacrifice.animation_counter);
             cutoff = ((((lltemp >> 24) & 0x1F) + (long)lltemp) >> 5) / 2;
@@ -7776,7 +7815,7 @@ static void prepare_jonty_remap_and_scale(int32_t *scale, const struct BucketKin
     long shade_factor;
     long fade;
     thing = jspr->thing;
-    long minimum_lightness = game.conf.rules[thing->owner].game.thing_minimum_illumination << 8;
+    long minimum_lightness = game.conf.rules[thing->owner].gameplay.thing_minimum_illumination << 8;
     if (lens_mode == 0)
     {
         fade = 65536;
@@ -7867,12 +7906,16 @@ static void draw_jonty_mapwho(struct BucketKindJontySprite *jspr)
     unsigned char alpha_mem;
     struct PlayerInfo *player = get_my_player();
     struct Thing *thing = jspr->thing;
+    unsigned short animation_sprite;
+    unsigned char current_frame;
     long angle;
     int32_t scaled_size;
     struct ObjectConfigStats* objst;
     flg_mem = lbDisplay.DrawFlags;
     alpha_mem = EngineSpriteDrawUsingAlpha;
-    if (keepersprite_rotable(thing->anim_sprite))
+    animation_sprite = get_render_animation_sprite(thing->anim_sprite);
+    current_frame = thing->current_frame;
+    if (keepersprite_rotable(animation_sprite))
     {
       angle = thing->move_angle_xy - spr_map_angle;
       angle += DEGREES_45 * (long)((thing->flags & TAF_ROTATED_MASK) >> TAF_ROTATED_SHIFT);
@@ -7898,14 +7941,14 @@ static void draw_jonty_mapwho(struct BucketKindJontySprite *jspr)
 
     if (!thing_is_invalid(thing))
     {
-        if ((player->thing_under_hand == thing->index) && ((game.play_gameturn % (4 * gui_blink_rate)) >= 2 * gui_blink_rate))
-        {
-          if (player->acamera->view_mode == PVM_IsoWibbleView || player->acamera->view_mode == PVM_IsoStraightView)
+        if ((local_thing_under_hand == thing->index) && ((get_gameturn() % (4 * gui_blink_rate)) >= 2 * gui_blink_rate)) {
+          struct Camera *active_cam = get_player_active_camera(player);
+          if ((active_cam != NULL) && (active_cam->view_mode == PVM_IsoWibbleView || active_cam->view_mode == PVM_IsoStraightView))
           {
               lbDisplay.DrawFlags |= Lb_TEXT_UNDERLNSHADOW;
               lbSpriteReMapPtr = white_pal;
           }
-          else if (player->acamera->view_mode == PVM_CreatureView)
+          else if ((active_cam != NULL) && (active_cam->view_mode == PVM_CreatureView))
           {
               struct Thing *creatng = thing_get(player->influenced_thing_idx);
               if (thing_is_creature(creatng))
@@ -7919,7 +7962,7 @@ static void draw_jonty_mapwho(struct BucketKindJontySprite *jspr)
                   }
                   else if (thing_is_trap_crate(dragtng))
                   {
-                      struct Thing *handthing = thing_get(player->thing_under_hand);
+                      struct Thing *handthing = thing_get(local_thing_under_hand);
                       if (thing_exists(handthing))
                       {
                           if (handthing->class_id == TCls_Trap)
@@ -7936,12 +7979,6 @@ static void draw_jonty_mapwho(struct BucketKindJontySprite *jspr)
             {
                 lbDisplay.DrawFlags |= Lb_TEXT_UNDERLNSHADOW;
                 lbSpriteReMapPtr = red_pal;
-                thing->time_spent_displaying_hurt_colour += game.delta_time;
-                if (thing->time_spent_displaying_hurt_colour >= 1.0 || game.frame_skip > 0)
-                {
-                    thing->time_spent_displaying_hurt_colour = 0;
-                    thing->rendering_flags &= ~TRF_BeingHit; // Turns off red damage colour tint
-                }
             }
         }
         thing_being_displayed_is_creature = 1;
@@ -7956,12 +7993,9 @@ static void draw_jonty_mapwho(struct BucketKindJontySprite *jspr)
         render_sprite_debug_fn(thing, jspr->scr_x, jspr->scr_y);
     }
 
-    if (
-        ((thing->anim_sprite >= total_keepersprite_animations) && (thing->anim_sprite < KEEPERSPRITE_ADD_OFFSET))
-        || (thing->anim_sprite >= KEEPERSPRITE_ADD_OFFSET + KEEPERSPRITE_ADD_NUM)
-    )
+    if (animation_sprite_id_invalid(animation_sprite))
     {
-        ERRORLOG("Invalid graphic Id %d from model %d, class %d", (int)thing->anim_sprite, (int)thing->model, (int)thing->class_id);
+        ERRORLOG("Invalid graphic Id %d from model %d, class %d", (int)animation_sprite, (int)thing->model, (int)thing->class_id);
     } else
     {
         struct TrapConfigStats *trapst;
@@ -7974,7 +8008,7 @@ static void draw_jonty_mapwho(struct BucketKindJontySprite *jspr)
                 process_keeper_flame_on_sprite(jspr, angle, scaled_size);
                 break;
             }
-            process_keeper_sprite(jspr->scr_x, jspr->scr_y, thing->anim_sprite, angle, thing->current_frame, scaled_size);
+            process_keeper_sprite(jspr->scr_x, jspr->scr_y, animation_sprite, angle, current_frame, scaled_size);
             break;
         case TCls_Trap:
             trapst = get_trap_model_stats(thing->model);
@@ -7987,10 +8021,10 @@ static void draw_jonty_mapwho(struct BucketKindJontySprite *jspr)
                 process_keeper_flame_on_sprite(jspr, angle, scaled_size);
                 break;
             }
-            process_keeper_sprite(jspr->scr_x, jspr->scr_y, thing->anim_sprite, angle, thing->current_frame, scaled_size);
+            process_keeper_sprite(jspr->scr_x, jspr->scr_y, animation_sprite, angle, current_frame, scaled_size);
             break;
         default:
-            process_keeper_sprite(jspr->scr_x, jspr->scr_y, thing->anim_sprite, angle, thing->current_frame, scaled_size);
+            process_keeper_sprite(jspr->scr_x, jspr->scr_y, animation_sprite, angle, current_frame, scaled_size);
             break;
         }
     }
@@ -8151,8 +8185,17 @@ static void draw_keepsprite_unscaled_in_buffer(unsigned short kspr_n, short angl
         flip_range = true;
     i = ((angle + DEGREES_22_5) & ANGLE_MASK);
     quarter = abs(4 - (i >> 8)); // i is restricted by "&" so (i>>8) is 0..7
-    kspr_idx = keepersprite_index(kspr_n);
     kspr_arr = keepersprite_array(kspr_n);
+    if (kspr_arr == NULL) {
+        return;
+    }
+    if (kspr_arr->FramesCount == 0) {
+        return;
+    }
+    if (current_frame >= kspr_arr->FramesCount) {
+        current_frame = kspr_arr->FramesCount - 1;
+    }
+    kspr_idx = keepersprite_index(kspr_n);
 
     if (kspr_arr->Rotable == 0)
     {
@@ -8556,31 +8599,32 @@ static void process_frontview_map_volume_box(struct Camera *cam, unsigned char s
     unsigned char default_color = map_volume_box.color;
     unsigned char line_color = default_color;
     struct PlayerInfo* current_player = get_player(plyr_idx);
+    struct RoomSpace *render_roomspace = get_local_dig_prediction_render_roomspace(&current_player->render_roomspace);
     // Check if a roomspace is currently being built
     // and if so feed this back to the user
     if ((current_player->roomspace.is_active) && ((current_player->work_state == PSt_Sell) || (current_player->work_state == PSt_BuildRoom)))
     {
         line_color = SLC_REDYELLOW; // change the cursor color to indicate to the user that nothing else can be built or sold at the moment
     }
-    if (current_player->render_roomspace.render_roomspace_as_box)
+    if (render_roomspace->render_roomspace_as_box)
     {
-        if (current_player->render_roomspace.is_roomspace_a_box)
+        if (render_roomspace->is_roomspace_a_box)
         {
             // This is a basic square box
-             create_frontview_map_volume_box(cam, stl_width, current_player->render_roomspace.is_roomspace_a_single_subtile, line_color);
+             create_frontview_map_volume_box(cam, stl_width, render_roomspace->is_roomspace_a_single_subtile, line_color);
         }
         else
         {
             // This is a "2-line" square box
             // i.e. an "accurate" box with an outer square box
             map_volume_box.color = line_color;
-            create_fancy_frontview_map_volume_box(current_player->render_roomspace, cam, stl_width, (current_player->render_roomspace.slab_count == 0) ? SLC_RED : SLC_BROWN, true);
+            create_fancy_frontview_map_volume_box(*render_roomspace, cam, stl_width, (render_roomspace->slab_count == 0) ? SLC_RED : SLC_BROWN, true);
         }
     }
     else
     {
         // This is an "accurate"/"automagic" box
-        create_fancy_frontview_map_volume_box(current_player->render_roomspace, cam, stl_width, line_color, false);
+        create_fancy_frontview_map_volume_box(*render_roomspace, cam, stl_width, line_color, false);
     }
     map_volume_box.color = default_color;
 }
@@ -8624,12 +8668,11 @@ static void do_map_who_for_thing(struct Thing *thing)
     struct EngineCoord ecor;
     struct NearestLights nearlgt;
 
-    interpolate_thing(thing);
-    int render_pos_x, render_floorpos, render_pos_y, render_pos_z;
-    render_pos_x = thing->interp_mappos.x.val;
-    render_pos_y = thing->interp_mappos.z.val;
-    render_pos_z = thing->interp_mappos.y.val;
-    render_floorpos = thing->interp_floor_height;
+    const struct ThingInterpolateResult interp = interpolate_thing(thing);
+    const int render_pos_x = interp.mappos.x.val;
+    const int render_pos_y = interp.mappos.z.val;
+    const int render_pos_z = interp.mappos.y.val;
+    const int render_floorpos = interp.floor_height;
 
     switch (thing->draw_class)
     {
@@ -8645,8 +8688,9 @@ static void do_map_who_for_thing(struct Thing *thing)
             int count;
             int i;
 
-            struct KeeperSprite *spr = keepersprite_array(thing->anim_sprite);
-            if ((spr->frame_flags & FFL_NoShadows) == 0)
+            unsigned short animation_sprite = get_render_animation_sprite(thing->anim_sprite);
+            struct KeeperSprite *spr = keepersprite_array(animation_sprite);
+            if ((spr != NULL) && ((spr->frame_flags & FFL_NoShadows) == 0))
             {
                 count = find_closest_lights(&thing->mappos, &nearlgt);
                 for (i = 0; i < count; i++)
@@ -8713,18 +8757,18 @@ static void do_map_who_for_thing(struct Thing *thing)
         rotpers(&ecor, &camera_matrix);
         if (getpoly < poly_pool_end)
         {
-            if (game.play_gameturn - thing->roomflag2.last_turn_drawn == 1)
+            if (get_gameturn() - thing->roomflag.last_turn_drawn == 1)
             {
-                if (thing->roomflag2.display_timer < 10) {
-                    thing->roomflag2.display_timer++;
+                if (thing->roomflag.display_timer < 10) {
+                    thing->roomflag.display_timer++;
                 }
             } else {
-                if (game.play_gameturn - thing->roomflag2.last_turn_drawn > 1) {
-                    thing->roomflag2.display_timer = 0;
+                if (get_gameturn() - thing->roomflag.last_turn_drawn > 1) {
+                    thing->roomflag.display_timer = 0;
                 }
             }
-            thing->roomflag2.last_turn_drawn = game.play_gameturn;
-            if (thing->roomflag2.display_timer == 10)
+            thing->roomflag.last_turn_drawn = get_gameturn();
+            if (thing->roomflag.display_timer == 10)
             {
                 bckt_idx = (ecor.z - 64) / 16 - 6;
                 add_room_flag_pole_to_polypool(ecor.view_width, ecor.view_height, thing->roomflag.room_idx, bckt_idx);
@@ -8747,7 +8791,7 @@ static void do_map_who_for_thing(struct Thing *thing)
     default:
         break;
     }
-    thing->last_turn_drawn = game.play_gameturn;
+    thing->last_turn_drawn = get_gameturn();
 }
 
 static void do_map_who(short tnglist_idx)
@@ -8787,7 +8831,7 @@ static void do_map_who(short tnglist_idx)
 static void draw_frontview_thing_on_element(struct Thing *thing, struct Map *map, struct Camera *cam)
 {
     // The draw_frontview_thing_on_element() function is the FrontView equivalent of do_map_who_for_thing()
-    interpolate_thing(thing);
+    struct ThingInterpolateResult interp = interpolate_thing(thing);
 
     int32_t cx;
     int32_t cy;
@@ -8797,7 +8841,7 @@ static void draw_frontview_thing_on_element(struct Thing *thing, struct Map *map
     switch (thing->draw_class)
     {
     case ODC_Default: // Things
-        convert_world_coord_to_front_view_screen_coord(&thing->interp_mappos,cam,&cx,&cy,&cz);
+        convert_world_coord_to_front_view_screen_coord(&interp.mappos, cam, &cx, &cy, &cz);
         if (is_free_space_in_poly_pool(1))
         {
             add_thing_sprite_to_polypool(thing, cx, cy, cy, cz-3);
@@ -8808,7 +8852,7 @@ static void draw_frontview_thing_on_element(struct Thing *thing, struct Map *map
         }
         break;
     case ODC_RoomPrice: // Floating gold text when buying and selling
-        convert_world_coord_to_front_view_screen_coord(&thing->interp_mappos,cam,&cx,&cy,&cz);
+        convert_world_coord_to_front_view_screen_coord(&interp.mappos, cam, &cx, &cy, &cz);
         if (is_free_space_in_poly_pool(1))
         {
             add_number_to_polypool(cx, cy, thing->creature.gold_carried, 1);
@@ -8825,21 +8869,21 @@ static void draw_frontview_thing_on_element(struct Thing *thing, struct Map *map
             break;
         }
 
-        convert_world_coord_to_front_view_screen_coord(&thing->interp_mappos,cam,&cx,&cy,&cz);
+        convert_world_coord_to_front_view_screen_coord(&interp.mappos, cam, &cx, &cy, &cz);
         if (is_free_space_in_poly_pool(1))
         {
-            if (game.play_gameturn - thing->roomflag2.last_turn_drawn == 1)
+            if (get_gameturn() - thing->roomflag.last_turn_drawn == 1)
             {
-                if (thing->roomflag2.display_timer < 10) {
-                    thing->roomflag2.display_timer++;
+                if (thing->roomflag.display_timer < 10) {
+                    thing->roomflag.display_timer++;
                 }
             } else {
-                if (game.play_gameturn - thing->roomflag2.last_turn_drawn > 1) {
-                    thing->roomflag2.display_timer = 0;
+                if (get_gameturn() - thing->roomflag.last_turn_drawn > 1) {
+                    thing->roomflag.display_timer = 0;
                 }
             }
-            thing->roomflag2.last_turn_drawn = game.play_gameturn;
-            if (thing->roomflag2.display_timer == 10)
+            thing->roomflag.last_turn_drawn = get_gameturn();
+            if (thing->roomflag.display_timer == 10)
             {
                 add_room_flag_pole_to_polypool(cx, cy, thing->roomflag.room_idx, cz-3);
                 if (is_free_space_in_poly_pool(1))
@@ -8850,7 +8894,7 @@ static void draw_frontview_thing_on_element(struct Thing *thing, struct Map *map
         }
         break;
     case ODC_SpinningKey:
-        convert_world_coord_to_front_view_screen_coord(&thing->interp_mappos,cam,&cx,&cy,&cz);
+        convert_world_coord_to_front_view_screen_coord(&interp.mappos, cam, &cx, &cy, &cz);
         if (is_free_space_in_poly_pool(1))
         {
             add_spinning_key_to_polypool(thing, cx, cy, cy, cz-3);
@@ -8859,7 +8903,7 @@ static void draw_frontview_thing_on_element(struct Thing *thing, struct Map *map
     default:
         break;
     }
-    thing->last_turn_drawn = game.play_gameturn;
+    thing->last_turn_drawn = get_gameturn();
 }
 
 static void draw_frontview_things_on_element(struct Map *mapblk, struct Camera *cam)
@@ -8982,6 +9026,7 @@ void draw_frontview_engine(struct Camera *cam)
     }
 
     update_frontview_pointed_block(zoom, qdrant, px, py, qx, qy);
+    update_local_mouse_light();
     if ( (map_volume_box.visible) && (!game_is_busy_doing_gui()) )
     {
         process_frontview_map_volume_box(cam, ((zoom >> 8) & 0xFF), player->id_number);

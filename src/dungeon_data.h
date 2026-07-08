@@ -141,7 +141,7 @@ struct Modifiers
 };
 
 struct Dungeon {
-    unsigned short dnheart_idx;
+    ThingIndex dnheart_idx;
     struct Coord3d mappos;
     unsigned char creature_tendencies;
     unsigned char computer_enabled;
@@ -206,7 +206,6 @@ struct Dungeon {
     int manage_score;
     int total_score;
     uint32_t max_gameplay_score;
-    short times_breached_dungeon;
     short highest_task_number;
     GoldAmount total_money_owned;
     GoldAmount offmap_money_owned;
@@ -269,7 +268,7 @@ struct Dungeon {
     MapSubtlCoord devastation_centr_y;
     GameTurn devastation_turn;
     int32_t creatures_total_pay;
-    unsigned short gold_hoard_for_pickup;
+    ThingIndex gold_hoard_for_pickup;
     uint32_t gold_pickup_amount;
     /** Index of last creature picked up of given model. */
     unsigned short selected_creatures_of_model[CREATURE_TYPES_MAX];
@@ -286,22 +285,22 @@ struct Dungeon {
     struct Coord3d        last_trap_event_location;
     int                   creature_awarded[CREATURE_TYPES_MAX];
     CrtrExpLevel          creature_entrance_level;
-    uint32_t         evil_creatures_converted;
-    uint32_t         good_creatures_converted;
-    uint32_t         creatures_transferred;
-    uint32_t         traps_sold;
-    uint32_t         doors_sold;
-    uint32_t         manufacture_gold;
-    int32_t                  creatures_total_backpay;
-    int32_t                  cheaper_diggers;
-    int32_t                  event_last_run_turn[EVENT_KIND_COUNT];
-    int32_t                  script_flags[SCRIPT_FLAGS_COUNT];
+    uint32_t              evil_creatures_converted;
+    uint32_t              good_creatures_converted;
+    uint32_t              creatures_transferred;
+    uint32_t              traps_sold;
+    uint32_t              doors_sold;
+    uint32_t              manufacture_gold;
+    int32_t               creatures_total_backpay;
+    int32_t               cheaper_diggers;
+    int32_t               event_last_run_turn[EVENT_KIND_COUNT];
+    int32_t               script_flags[SCRIPT_FLAGS_COUNT];
     unsigned short        room_list_start[TERRAIN_ITEMS_MAX];
     unsigned char         room_buildable[TERRAIN_ITEMS_MAX];
     unsigned char         room_resrchable[TERRAIN_ITEMS_MAX];
     unsigned char         room_discrete_count[TERRAIN_ITEMS_MAX+1];
-    unsigned short        backup_heart_idx;
-    unsigned short        free_soul_idx;
+    ThingIndex            backup_heart_idx;
+    ThingIndex            free_soul_idx;
     struct HandRule       hand_rules[CREATURE_TYPES_MAX][HAND_RULE_SLOTS_COUNT];
 };
 /******************************************************************************/

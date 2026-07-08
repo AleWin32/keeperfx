@@ -243,11 +243,6 @@ void script_process_value(unsigned long var_index, unsigned long plr_range_id, l
           set_door_buildable_and_add_to_amount(i, param1, param2, param3);
       }
       break;
-  case Cmd_DISPLAY_INFORMATION:
-      if ((my_player_number >= plr_start) && (my_player_number < plr_end)) {
-          set_general_information(param1, param2, stl_num_decode_x(param3), stl_num_decode_y(param3));
-      }
-      break;
   case Cmd_ADD_CREATURE_TO_POOL:
       add_creature_to_pool(param1, param2);
       break;
@@ -285,7 +280,6 @@ void script_process_value(unsigned long var_index, unsigned long plr_range_id, l
       crconf->fearsome_factor = saturate_set_unsigned(param2, 16);
       break;
   case Cmd_SET_CREATURE_PROPERTY:
-      crconf = &game.conf.crtr_conf.model[param1];
       crconf = creature_stats_get(param1);
       switch (param2)
       {
@@ -579,6 +573,34 @@ void script_process_value(unsigned long var_index, unsigned long plr_range_id, l
           recalculate_all_creature_digger_lists();
           update_creatr_model_activities_list(1);
           break;
+      case 36: // NO_HEALTH_FLOWER
+          if (param3 >= 1) {
+              set_flag(crconf->model_flags, CMF_NoHealthFlower);
+          } else {
+              clear_flag(crconf->model_flags, CMF_NoHealthFlower);
+          }
+          break;
+      case 37: // CANNOT_PICK_UP
+          if (param3 >= 1) {
+              set_flag(crconf->model_flags, CMF_CannotPickUp);
+          } else {
+              clear_flag(crconf->model_flags, CMF_CannotPickUp);
+          }
+          break;
+      case 38: // DROP_ON_PATH
+          if (param3 >= 1) {
+              set_flag(crconf->model_flags, CMF_DropOnPath);
+          } else {
+              clear_flag(crconf->model_flags, CMF_DropOnPath);
+          }
+          break;
+      case 39: // CANNOT_POSSESS
+          if (param3 >= 1) {
+              set_flag(crconf->model_flags, CMF_CannotPossess);
+          } else {
+              clear_flag(crconf->model_flags, CMF_CannotPossess);
+          }
+          break;
       default:
           SCRPTERRLOG("Unknown creature property '%ld'", param2);
           break;
@@ -591,18 +613,19 @@ void script_process_value(unsigned long var_index, unsigned long plr_range_id, l
           set_ally_with_player(param1, i, (param2 & 1) ? true : false);
           set_player_ally_locked(i, param1, (param2 & 2) ? true : false);
           set_player_ally_locked(param1, i, (param2 & 2) ? true : false);
-          if (game.conf.rules[i].game.allies_share_vision)
+          if (game.conf.rules[i].gameplay.allies_share_vision)
           {
               panel_map_update(0, 0, game.map_subtiles_x + 1, game.map_subtiles_y + 1);
           }
       }
+      update_navigation_around_all_doors();
       break;
   case Cmd_DEAD_CREATURES_RETURN_TO_POOL:
       set_flag_value(game.mode_flags, MFlg_DeadBackToPool, param1);
       break;
   case Cmd_BONUS_LEVEL_TIME:
       if (param1 > 0) {
-          game.bonus_time = game.play_gameturn + param1;
+          game.bonus_time = get_gameturn() + param1;
           set_flag(game.flags_gui,GGUI_CountdownTimer);
       } else {
           game.bonus_time = 0;
@@ -616,14 +639,6 @@ void script_process_value(unsigned long var_index, unsigned long plr_range_id, l
       {
           game.timer_real = false;
       }
-      break;
-  case Cmd_QUICK_OBJECTIVE:
-      if ((my_player_number >= plr_start) && (my_player_number < plr_end))
-          process_objective(game.quick_messages[param1%QUICK_MESSAGES_COUNT], param2, stl_num_decode_x(param3), stl_num_decode_y(param3));
-      break;
-  case Cmd_QUICK_INFORMATION:
-      if ((my_player_number >= plr_start) && (my_player_number < plr_end))
-          set_quick_information(param1, param2, stl_num_decode_x(param3), stl_num_decode_y(param3));
       break;
   case Cmd_ADD_GOLD_TO_PLAYER:
       for (i=plr_start; i < plr_end; i++)
@@ -650,8 +665,8 @@ void script_process_value(unsigned long var_index, unsigned long plr_range_id, l
           set_creature_tendencies(player, param1, param2);
           if (is_my_player(player)) {
               dungeon = get_players_dungeon(player);
-              game.creatures_tend_imprison = ((dungeon->creature_tendencies & 0x01) != 0);
-              game.creatures_tend_flee = ((dungeon->creature_tendencies & 0x02) != 0);
+              game.creatures_tend_imprison = ((dungeon->creature_tendencies & CrTend_Imprison) != 0);
+              game.creatures_tend_flee = ((dungeon->creature_tendencies & CrTend_Flee) != 0);
           }
       }
       break;
